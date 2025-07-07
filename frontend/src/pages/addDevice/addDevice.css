@@ -2,3 +2,7 @@
     margin: 20% 20% 20% 20%;
     background-color: aquamarine;
 }
+.MuiMenuItem-root {
+  text-align: left;
+  justify-content: flex-start;
+}

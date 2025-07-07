@@ -1,6 +1,6 @@
-import type Reading from "./reading";
-import type Device from "./device";
+import type ReadingType from "./reading";
+import type DeviceType from "./device";
 
  export type {
-    Reading,Device
+    ReadingType,DeviceType
  }
