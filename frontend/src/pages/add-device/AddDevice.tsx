@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Button, Box, TextField, MenuItem, FormLabel, Stack, FormGroup } from '@mui/material';
 import './addDevice.css';
 import type { DeviceType } from '../../types/index ';
+import { Weight } from 'lucide-react';
 
 function AddDevice() {
   const initialDevice: DeviceType = {
@@ -89,7 +90,7 @@ function AddDevice() {
   };
 
   return (
-    <div className="form-wrapper">
+    <div className="add-device-form-wrapper">
       <Box component="form" noValidate onSubmit={handleSubmit} autoComplete="on">
         <div className="login-form-container">
           <FormGroup>
@@ -132,8 +133,8 @@ function AddDevice() {
             className="input-field"
           />
 
-          <FormLabel htmlFor="status" sx={{ mb: 0.5 }}>Status</FormLabel>
-          <TextField
+            <FormLabel htmlFor="status" sx={{ mb: 0.5 }}>Status</FormLabel>
+            <TextField
             id="status"
             select
             name="status"
@@ -142,10 +143,28 @@ function AddDevice() {
             variant="filled"
             fullWidth
             className="input-field"
-          >
-            <MenuItem value="on">On</MenuItem>
-            <MenuItem value="off">Off</MenuItem>
-          </TextField>
+            SelectProps={{
+              MenuProps: {
+              PaperProps: {
+                sx: {
+                '& .MuiMenuItem-root[data-value="on"]': { color: 'green', fontWeight: 'bold' },
+                '& .MuiMenuItem-root[data-value="off"]': { color: 'red', fontWeight: 'bold' },
+                },
+              },
+              },
+              sx: {
+              color: formData.status === 'on' ? 'green' : 'red',
+              fontWeight: 'bold',
+              },
+            }}
+            >
+            <MenuItem value="on" sx={{ fontWeight: 'bold', color: 'green' }}>
+              <strong>On</strong>
+            </MenuItem>
+            <MenuItem value="off" sx={{ fontWeight: 'bold', color: 'red' }}>
+              <strong>Off</strong>
+            </MenuItem>
+            </TextField>
 
           <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
           <Stack direction="row" spacing={2}>

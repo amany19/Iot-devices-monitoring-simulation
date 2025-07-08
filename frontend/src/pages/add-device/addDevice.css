@@ -1,8 +1,23 @@
+.add-device-form-wrapper{
+  margin-top: 80px;
+  width: 800;
+}
 .form-container{
     margin: 20% 20% 20% 20%;
     background-color: aquamarine;
 }
-.MuiMenuItem-root {
+.MuiFormLabel-root {
+font-weight: bold !important;
+color: rgb(14, 83, 83) !important;
+
+}
+.MuiSelect-filled {
   text-align: left;
-  justify-content: flex-start;
+}
+.MuiSelect-select {
+  padding-left: 12px; 
+  text-align: left;
+}
+Button{
+  background-color: rgb(14, 83, 83) !important;
 }

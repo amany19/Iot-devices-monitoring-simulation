@@ -1,0 +1,12 @@
+.MuiAppBar-root {
+    background-color: rgb(2, 4, 173) !important;
+    color: white !important;
+}
+.sidebar-wrapper {
+    margin-top: 25%;
+ 
+    width: 240px;
+    background-color: rgb(14, 83, 83) !important;
+    height: 100%;
+    color: white !important;
+}
