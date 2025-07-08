@@ -4,5 +4,5 @@ A full-stack web application for simulating and monitoring Govee devices.
 
 ## Tech Stack
 
-- Frontend: React + TypeScript + Tailwind CSS
+- Frontend: React + TypeScript + MaterialUI
 - Backend: TBD (Node.js or Django)

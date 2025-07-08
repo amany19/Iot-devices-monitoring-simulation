@@ -1,6 +1,6 @@
-import DeviceCard from "../components/DeviceCard";
+import DeviceCard from "../../components/DeviceCard";
 
-import { mockDevices } from "../mockData/mockDevices";
+import { mockDevices } from "../../mockData/mockDevices";
 import { useNavigate } from "react-router-dom";
 export default function Devices (){
 const navigate = useNavigate();
