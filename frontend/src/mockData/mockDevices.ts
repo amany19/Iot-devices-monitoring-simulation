@@ -1,6 +1,6 @@
-import type { Device } from "../types/index ";
+import type { DeviceType } from "../types/index ";
 
-export const mockDevices :Device[]= [
+export const mockDevices :DeviceType[]= [
   {
     id: "1",
     name: "Humidor #1",
