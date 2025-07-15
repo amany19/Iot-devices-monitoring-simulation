@@ -10,7 +10,7 @@ from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from io import BytesIO
 import zipfile 
-from datetime import datetime
+from datetime import datetime,time
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import matplotlib.pyplot as plt
@@ -120,9 +120,10 @@ class DeviceViewSet(viewsets.ModelViewSet):
         buffer.seek(0)
         return buffer
     #report for single device
-    @action(detail=True, methods=['get'], url_path='report')  # ✅ Corrected here
+    @action(detail=True, methods=['get'], url_path='report')   
     def generate_pdf_report(self, request, pk=None):
         try:
+            
             device = self.get_object()
             start_param = request.query_params.get('start')
             end_param = request.query_params.get('end')
@@ -137,9 +138,10 @@ class DeviceViewSet(viewsets.ModelViewSet):
             return response
 
         except Device.DoesNotExist:
+            print(f"DEBUG: device with id {pk} not found")
             return Response({'error': 'Device not found'}, status=status.HTTP_404_NOT_FOUND)
     # All Devices' Reports
-    @action(detail=False, methods=['get'], url_path='report')
+    @action(detail=False, methods=['get'], url_path='report/all')
     def generate_all_devices_reports(self, request):
         devices = self.get_queryset()
         start_param = request.query_params.get('start')
@@ -183,13 +185,21 @@ class DeviceViewSet(viewsets.ModelViewSet):
         response = HttpResponse(zip_buffer, content_type='application/zip')
         response['Content-Disposition'] = 'attachment; filename="selected_devices_reports.zip"'
         return response
-
-    @action(detail=True, methods=['get'])
+    @action(detail=True, methods=['get'],url_path='readings')
     def readings(self,request, pk=None):
-        device =self.get_object()
+        device= self.get_object()
+        start_date = request.query_params.get('start')
+        end_date= request.query_params.get('end')
         readings= device.readings.all().order_by('timestamp')
+        if start_date:
+            start_date_time=datetime.combine(datetime.fromisoformat(start_date).date(), time.min    )
+            readings= readings.filter(timestamp__gte=start_date_time)
+        if end_date:
+            end_date_time=datetime.combine(datetime.fromisoformat(end_date).date(), time.max    )
+            readings= readings.filter(timestamp__lte=end_date_time)
         serializer= ReadingSerializer(readings,many=True)
         return Response(serializer.data)
+
 #Reading 
 from rest_framework import viewsets
 from .models import Reading

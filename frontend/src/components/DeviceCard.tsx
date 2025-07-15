@@ -1,30 +1,138 @@
+import { Fragment, useEffect, useState } from "react";
 import type Device from "../types/device";
+import Card from '@mui/material/Card';
+import CardContent from '@mui/material/CardContent';
+import CardActions from '@mui/material/CardActions';
+import Button from '@mui/material/Button';
+import PowerRounded from '@mui/icons-material/PowerRounded';
+import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
+import { Alert, IconButton, Snackbar, Typography } from "@mui/material";
 
-export default function DeviceCard({ name, location, status, normalTemperatureRange, normalHumidityRange }: Device) {
+type Props = {
+  device: Device;
+  onClick?: () => void;
+  onDeleteSuccess?: () => void;
+};
+
+export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) {
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [showSuccess, setShowSuccess] = useState(false);
+
+  // Track snackbar state updates
+  useEffect(() => {
+    if (showSuccess) {
+      console.log("Snackbar should now be visible for:", device.code);
+    }
+  }, [showSuccess]);
+
+  const handleCloseSnackbar = () => {
+    setShowSuccess(false);
+    setError(null);
+  };
+
+  const handleDelete = async () => {
+    if (!window.confirm(`Are you sure you want to delete Device ${device.code}`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/devices/${device.id}/`, {
+        method: 'DELETE',
+        headers: {
+          'Content-type': 'application/json',
+          'Authorization': `Bearer ${localStorage.getItem('token')}`
+        }
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to delete device!');
+      }
+
+      setShowSuccess(true); // triggers useEffect
+
+      // Call the success callback to let parent refresh
+      onDeleteSuccess?.();
+
+    } catch (error) {
+      setError(error instanceof Error ? error.message : 'An unknown error occurred!');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   return (
-    <div className="bg-white p-4 rounded-lg shadow flex justify-between items-center">
-      <div>
-        <h2 className="text-lg font-semibold text-gray-800">{name}</h2>
-        <p className="text-sm text-gray-500">{location}</p>
-        <span
-          className={`text-sm font-medium ${status === "on" ? "text-green-600" : "text-red-600"}`}
+    <Fragment>
+      <Card className="device-card">
+        <IconButton
+          className="card-delete-icon"
+          onClick={handleDelete}
+          disabled={isDeleting}
+          aria-label="delete device"
         >
-          ● {status}
-        </span>
-      </div>
-      <div className="flex gap-6 items-center text-right">
-        <div>
-          <p className="text-sm text-gray-400">Temp</p>
-          <p className="font-semibold text-gray-800">min: {normalTemperatureRange.min} max: {normalTemperatureRange.max}</p>
-        </div>
-        <div>
-          <p className="text-sm text-gray-400">Humidity</p>
-          <p className="font-semibold text-gray-800">min:{normalHumidityRange.min} max:{normalHumidityRange.max}</p>
-        </div>
-        <button className="border border-gray-300 px-3 py-1 rounded-md hover:bg-gray-100">
-          Manage
-        </button>
-      </div>
-    </div>
+          <DeleteForeverIcon color={isDeleting ? "disabled" : "error"} />
+        </IconButton>
+
+        <CardContent>
+          <h2>{device.code}</h2>
+          <h3>{device.name}</h3>
+          <p>Location: {device.location}</p>
+          <div>
+            Status
+            <Typography sx={{ color: device.status?.toLocaleLowerCase() === "on" ? '#10B981' : '#EF4444' }}>
+              {device.status} <PowerRounded />
+            </Typography>
+          </div>
+        </CardContent>
+
+        <CardActions>
+          <Button
+            className='default-button'
+            size="small"
+            variant="contained"
+            onClick={onClick}
+          >
+            View Details
+          </Button>
+        </CardActions>
+      </Card>
+
+      {/* Success Snackbar */}
+      <Snackbar
+        open={showSuccess}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        sx={{ zIndex: 999 }}
+      >
+        <Alert
+          severity="success"
+          onClose={handleCloseSnackbar}
+          sx={{ width: '100%' }}
+        >
+          Device {device.code} was deleted successfully!
+        </Alert>
+      </Snackbar>
+
+      {/* Error Snackbar */}
+      <Snackbar
+        open={!!error}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+        sx={{ zIndex: 999 }}
+      >
+        <Alert
+          severity="error"
+          onClose={handleCloseSnackbar}
+          sx={{ width: '100%' }}
+        >
+          {error}
+        </Alert>
+      </Snackbar>
+    </Fragment>
   );
 }

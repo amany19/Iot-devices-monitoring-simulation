@@ -13,6 +13,25 @@ class Device (models.Model):
     temperature_max = models.FloatField(null=True, blank=True)
     humidity_min = models.FloatField(null=True, blank=True)
     humidity_max = models.FloatField(null=True, blank=True)
+    #Recently added fields
+    model = models.CharField(max_length=100, blank=True, null=True)
+    manufacturer = models.CharField(max_length=100, blank=True, null=True)
+    serial_number = models.CharField(max_length=100, unique=True, blank=True, null=True)
+    firmware_version = models.CharField(max_length=50, blank=True, null=True)
+
+    alert_temp_min = models.FloatField(blank=True, null=True)
+    alert_temp_max = models.FloatField(blank=True, null=True)
+    alert_humidity_min = models.FloatField(blank=True, null=True)
+    alert_humidity_max = models.FloatField(blank=True, null=True)
+
+    logging_interval_minutes = models.PositiveIntegerField(default=15)
+
+    # Toggleable settings
+    button_stop_enabled = models.BooleanField(default=True)
+    mute_button_enabled = models.BooleanField(default=True)
+    alarm_tone_enabled = models.BooleanField(default=True)
+
+    storage_mode = models.CharField(max_length=100, blank=True, null=True)
     created_at = models.DateTimeField(auto_now_add=True)
 
     def __str__(self):

@@ -1,0 +1,40 @@
+/* Devices.css */
+.devices-container {
+  padding: 20px;
+ 
+  margin: 0 auto;
+}
+
+.devices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin: 20px 0;
+}
+
+Button:hover{
+  background-color:  #14B8A6 !important;
+}
+Button{
+  background-color:  #0D9488 !important;
+}
+.all-devices-top {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+  .devices-grid {
+    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  }
+}
+
+@media (max-width: 480px) {
+  .devices-grid {
+    grid-template-columns: 1fr;
+  }
+}

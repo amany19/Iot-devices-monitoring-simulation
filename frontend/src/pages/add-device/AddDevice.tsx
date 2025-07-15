@@ -1,46 +1,31 @@
 import { useState } from 'react';
 import { Button, Box, TextField, MenuItem, FormLabel, Stack, FormGroup } from '@mui/material';
 import './addDevice.css';
-import type { DeviceType } from '../../types/index ';
-import { Weight } from 'lucide-react';
-
+import type Device from '../../types/device';
+ 
 function AddDevice() {
-  const initialDevice: DeviceType = {
+
+  const initialDevice: Omit<Device, 'id' | 'readings'> = {
     name: '',
     code: '',
     location: '',
     status: 'off',
-    normalTemperatureRange: {
-      min: 0,
-      max: 0,
-    },
-    normalHumidityRange: {
-      min: 0,
-      max: 0,
-    },
+    humidity_min: 0,
+    humidity_max: 0,
+    temperature_min: 0,
+    temperature_max: 0,
   };
 
-  const [formData, setFormData] = useState<DeviceType>(initialDevice);
-  const [errors, setErrors] = useState<Partial<Record<keyof DeviceType, string>>>({});
-
+  const [formData, setFormData] = useState<Omit<Device, 'id' | 'readings'>>(initialDevice);
+  const [errors, setErrors] = useState<Partial<Record<keyof Omit<Device, 'id' | 'readings'>, string>>>({});
+ 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
-
-    if (name.startsWith('normalTemperatureRange.') || name.startsWith('normalHumidityRange.')) {
-      const [parentKey, childKey] = name.split('.') as ['normalTemperatureRange' | 'normalHumidityRange', 'min' | 'max'];
-      setFormData((prev: DeviceType) => ({
-        ...prev,
-        [parentKey]: {
-          ...prev[parentKey],
-          [childKey]: Number(value),
-        },
-      }));
-    } else {
-      setFormData((prev: DeviceType) => ({
-        ...prev,
-        [name]: value,
-      }));
-    }
+    
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name.includes('_min') || name.includes('_max') ? Number(value) : value,
+    }));
 
     setErrors((prev) => ({
       ...prev,
@@ -49,7 +34,7 @@ function AddDevice() {
   };
 
   const validate = () => {
-    const newErrors: Partial<Record<keyof DeviceType, string>> = {};
+    const newErrors: Partial<Record<keyof Omit<Device, 'id' | 'readings'>, string>> = {};
     let isValid = true;
 
     if (!formData.name.trim()) {
@@ -67,13 +52,13 @@ function AddDevice() {
       isValid = false;
     }
 
-    if (formData.normalTemperatureRange.min >= formData.normalTemperatureRange.max) {
-      newErrors.normalTemperatureRange = 'Temperature min must be less than max';
+    if (formData.temperature_min >= formData.temperature_max) {
+      newErrors.temperature_min = 'Temperature min must be less than max';
       isValid = false;
     }
 
-    if (formData.normalHumidityRange.min >= formData.normalHumidityRange.max) {
-      newErrors.normalHumidityRange = 'Humidity min must be less than max';
+    if (formData.humidity_min >= formData.humidity_max) {
+      newErrors.humidity_min = 'Humidity min must be less than max';
       isValid = false;
     }
 
@@ -81,11 +66,27 @@ function AddDevice() {
     return isValid;
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
 
     if (validate()) {
-      console.log('Device:', formData);
+      try {
+        const response = await fetch('http://localhost:8000/api/devices/', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(formData),
+        });
+        if (!response.ok) {
+          throw new Error('Failed to add device');
+        }
+        console.log('Device added:', formData);
+        // Optionally reset form or show success message
+      } catch (error) {
+        console.error(error);
+        // Optionally set error state
+      }
     }
   };
 
@@ -107,6 +108,7 @@ function AddDevice() {
               className="input-field"
             />
           </FormGroup>
+          
           <FormLabel htmlFor="code" sx={{ mb: 0.5 }}>Device Code</FormLabel>
           <TextField
             id="code"
@@ -133,8 +135,8 @@ function AddDevice() {
             className="input-field"
           />
 
-            <FormLabel htmlFor="status" sx={{ mb: 0.5 }}>Status</FormLabel>
-            <TextField
+          <FormLabel htmlFor="status" sx={{ mb: 0.5 }}>Status</FormLabel>
+          <TextField
             id="status"
             select
             name="status"
@@ -145,78 +147,76 @@ function AddDevice() {
             className="input-field"
             SelectProps={{
               MenuProps: {
-              PaperProps: {
-                sx: {
-                '& .MuiMenuItem-root[data-value="on"]': { color: 'green', fontWeight: 'bold' },
-                '& .MuiMenuItem-root[data-value="off"]': { color: 'red', fontWeight: 'bold' },
+                PaperProps: {
+                  sx: {
+                    '& .MuiMenuItem-root[data-value="on"]': { color: 'green', fontWeight: 'bold' },
+                    '& .MuiMenuItem-root[data-value="off"]': { color: 'red', fontWeight: 'bold' },
+                  },
                 },
               },
-              },
               sx: {
-              color: formData.status === 'on' ? 'green' : 'red',
-              fontWeight: 'bold',
+                color: formData.status === 'on' ? 'green' : 'red',
+                fontWeight: 'bold',
               },
             }}
-            >
+          >
             <MenuItem value="on" sx={{ fontWeight: 'bold', color: 'green' }}>
               <strong>On</strong>
             </MenuItem>
             <MenuItem value="off" sx={{ fontWeight: 'bold', color: 'red' }}>
               <strong>Off</strong>
             </MenuItem>
-            </TextField>
+          </TextField>
 
           <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
           <Stack direction="row" spacing={2}>
             <TextField
-              name="normalTemperatureRange.min"
+              name="temperature_min"
               label="Min"
               type="number"
-              value={formData.normalTemperatureRange.min}
+              value={formData.temperature_min}
               onChange={handleChange}
+              error={Boolean(errors.temperature_min)}
+              helperText={errors.temperature_min}
               variant="filled"
               fullWidth
             />
             <TextField
-              name="normalTemperatureRange.max"
+              name="temperature_max"
               label="Max"
               type="number"
-              value={formData.normalTemperatureRange.max}
+              value={formData.temperature_max}
               onChange={handleChange}
               variant="filled"
               fullWidth
             />
           </Stack>
-          {errors.normalTemperatureRange && (
-            <span className="error-text">{errors.normalTemperatureRange}</span>
-          )}
 
           <FormLabel sx={{ mt: 2 }}>Normal Humidity Range (%)</FormLabel>
           <Stack direction="row" spacing={2}>
             <TextField
-              name="normalHumidityRange.min"
+              name="humidity_min"
               label="Min"
               type="number"
-              value={formData.normalHumidityRange.min}
+              value={formData.humidity_min}
               onChange={handleChange}
+              error={Boolean(errors.humidity_min)}
+              helperText={errors.humidity_min}
               variant="filled"
               fullWidth
             />
             <TextField
-              name="normalHumidityRange.max"
+              name="humidity_max"
               label="Max"
               type="number"
-              value={formData.normalHumidityRange.max}
+              value={formData.humidity_max}
               onChange={handleChange}
               variant="filled"
               fullWidth
             />
           </Stack>
-          {errors.normalHumidityRange && (
-            <span className="error-text">{errors.normalHumidityRange}</span>
-          )}
 
-          <Button variant="contained" type="submit" fullWidth sx={{ mt: 3 }}>
+          <Button variant="contained" type="submit" className='default-button' fullWidth sx={{ mt: 3 }}>
             Add Device
           </Button>
         </div>

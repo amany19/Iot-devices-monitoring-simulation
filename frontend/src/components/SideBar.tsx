@@ -1,8 +1,6 @@
-// components/Sidebar.tsx
 import {
   Drawer,
   List,
-  ListItem,
   ListItemButton,
   ListItemIcon,
   ListItemText,
@@ -11,8 +9,8 @@ import {
 import DashboardIcon from '@mui/icons-material/Dashboard';
 import DevicesIcon from '@mui/icons-material/Devices';
 import LogoutIcon from '@mui/icons-material/Logout';
-import { Link } from 'react-router-dom';
-
+import { Link, useLocation } from 'react-router-dom';
+import AssessmentOutlined from'@mui/icons-material/AssessmentOutlined'
 const drawerWidth = 240;
 
 interface SidebarProps {
@@ -21,22 +19,46 @@ interface SidebarProps {
 }
 
 export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
+  const location = useLocation();
+
+  const navItems = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
+    { text: 'Devices', icon: <DevicesIcon />, path: '/devices' },
+    { text: 'Reports', icon: <AssessmentOutlined />, path: '/reports' },
+    { text: 'Logout', icon: <LogoutIcon />, path: '/logout' },
+  ];
+
   const drawerContent = (
-    <div className='sidebar-wrapper'>
+    <div style={{ backgroundColor: '#111827', height: '100%', color: '#E5E7EB' ,marginTop: '50px'}}>
       <Toolbar />
       <List>
-        <ListItemButton component={Link} to="/dashboard">
-          <ListItemIcon><DashboardIcon /></ListItemIcon>
-          <ListItemText primary="Dashboard" />
-        </ListItemButton>
-        <ListItemButton component={Link} to="/devices">
-          <ListItemIcon><DevicesIcon /></ListItemIcon>
-          <ListItemText primary="Devices" />
-        </ListItemButton>
-        <ListItemButton component={Link} to="/logout">
-          <ListItemIcon><LogoutIcon /></ListItemIcon>
-          <ListItemText primary="Logout" />
-        </ListItemButton>
+        {navItems.map((item) => {
+          const currentRootPath = '/' + location.pathname.split('/')[1];
+          const isActive = currentRootPath === item.path;
+
+          return (
+            <ListItemButton
+              key={item.text}
+              component={Link}
+              to={item.path}
+              sx={{
+                mx: 1,
+                my: 0.5,
+                borderRadius: 2,
+                backgroundColor: isActive ? '#14B8A6' : 'transparent',
+                color: isActive ? '#ffffff' : '#E5E7EB',
+                '&:hover': {
+                  backgroundColor: isActive ? '#0D9488' : '#1F2937',
+                },
+              }}
+            >
+              <ListItemIcon sx={{ color: isActive ? '#ffffff' : '#E5E7EB' }}>
+                {item.icon}
+              </ListItemIcon>
+              <ListItemText primary={item.text} />
+            </ListItemButton>
+          );
+        })}
       </List>
     </div>
   );
@@ -53,6 +75,8 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: 'border-box',
+            backgroundColor: '#111827',
+            color: '#E5E7EB',
           },
         }}
         open
@@ -71,6 +95,8 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
           [`& .MuiDrawer-paper`]: {
             width: drawerWidth,
             boxSizing: 'border-box',
+            backgroundColor: '#111827',
+            color: '#E5E7EB',
           },
         }}
       >

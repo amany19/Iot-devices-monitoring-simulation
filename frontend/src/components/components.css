@@ -1,12 +1,71 @@
 .MuiAppBar-root {
-    background-color: rgb(2, 4, 173) !important;
-    color: white !important;
+    background-color: #111827 !important; /* Light background */
+    color: #E5E7EB !important; /* Dark text */
+ 
 }
 .sidebar-wrapper {
-    margin-top: 25%;
- 
+  
+      flex-direction: column;
+  justify-content: center; /* vertical center */
+  align-items: center;  
     width: 240px;
-    background-color: rgb(14, 83, 83) !important;
+     background-color: #111827; /* Dark Gray */
+    color: #E5E7EB;
     height: 100%;
-    color: white !important;
+ 
 }
+/* Active Item */
+.sidebar-active-item {
+    
+    background-color: #14B8A6; /* Teal 500 */
+    color: white;
+    border-radius: 8px;
+    padding: 12px 16px;
+}
+
+.sidebar-active-item:hover {
+    background-color: #0D9488; /* Teal 600 */
+}
+
+/* Inactive Items */
+.sidebar-item {
+    color: #E5E7EB;
+    padding: 12px 16px;
+    transition: background-color 0.2s;
+}
+
+.sidebar-item:hover {
+    background-color: #1F2937; /* Hover Dark Gray */
+}
+/*Card component styling*/
+.device-card{
+    display:flex;
+    flex-direction: column;
+    position: relative;
+    align-items: center;
+    max-width: 400px;
+    max-height: 400px;
+    background-color: #F3F4F6; /* Light Gray */
+    border-radius: 8px;
+    padding: 16px;
+    margin: 8px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    cursor: pointer;
+    font-weight: bold;
+}
+.card-delete-icon{ 
+    position: absolute !important;
+     right: 8px !important;
+     top:  8px!important }
+.device-card:hover {
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    transform: translateY(-2px);        }
+/* Device details table styling */
+Table td:first-of-type{
+ 
+    background-color: #f5f5f5;
+    font-weight: bold;
+    text-transform: capitalize;
+    width: 30% !important;
+  }
+   
