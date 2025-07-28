@@ -33,7 +33,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
         device = serializer.save()
         # Backfill readings for the device
         backfill_readings(device)
-        print(f"Backfilled readings for device: {device.name}")
+        print(f"Backfilled readings for device: {device.code}")
     def _get_readings_for_device(self, device, start=None, end=None):
         readings = device.readings.all().order_by('timestamp')
         if start:

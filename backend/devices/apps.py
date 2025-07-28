@@ -7,6 +7,6 @@ class DevicesConfig(AppConfig):
     def ready(self):
         import devices.signals
         print("App ready - starting scheduler")  
-        # from . import simulator
-        # simulator.start()
+        from . import simulator
+        simulator.start()
         

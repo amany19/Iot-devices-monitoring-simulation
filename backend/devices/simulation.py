@@ -79,4 +79,4 @@ def generate_random_gap_reading(device_id):
         Reading.objects.bulk_create(readings_to_create)
         print(f"[Gap Fill] Filled {len(readings_to_create)} missing readings for {device.name}")
     else:
-        print(f"[Gap Fill] No gap detected for {device.name}")
+        print(f"[Gap Fill] No gap detected for {device.code}")

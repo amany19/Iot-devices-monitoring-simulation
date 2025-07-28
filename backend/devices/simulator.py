@@ -10,7 +10,7 @@ def start():
         generate_random_gap_reading(device.id)
         logging_interval_minutes = device.logging_interval_minutes   # Default to 15 minutes if not set
         
-        print(f"Scheduling readings for {device.name} every {logging_interval_minutes} minutes")
+        print(f"Scheduling readings for {device.code} every {logging_interval_minutes} minutes")
         scheduler.add_job(
             generate_random_reading,
             'interval',
