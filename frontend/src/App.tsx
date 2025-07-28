@@ -10,9 +10,12 @@ import DeviceDetails from './pages/device-details/DeviceDetails';
 import PDFReport from './pages/reports/PDFReport';
 import Alarms from './pages/alarms/Alarms';
 import ManufacturerPage from './pages/manufacturer/Manufacturer';
+import { AlarmProvider } from './context/AlarmContext';
 
 function App() {
   return (
+   <AlarmProvider>
+
     <BrowserRouter>
       <Routes>
         <Route path="/" element={<Login/>} />
@@ -25,7 +28,7 @@ function App() {
         <Route path="/login" element={<Login/>} />
       </Routes>
     </BrowserRouter>
-   
+   </AlarmProvider>
   );
 }
 
