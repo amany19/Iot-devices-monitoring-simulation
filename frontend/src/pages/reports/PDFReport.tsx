@@ -142,7 +142,7 @@ export default function PDFReport() {
         <MenuItem value="custom">Custom multiple devices</MenuItem>
         {devices?.map((device) => (
           <MenuItem key={device.id} value={device?.id?.toString()}>
-            {device.name} ({device.code})
+            {device.number} ({device.code})
           </MenuItem>
         ))}
       </TextField>
@@ -164,7 +164,7 @@ export default function PDFReport() {
     renderValue={(selected: string[]) =>
       devices
         ?.filter((d) => d.id !== undefined && selected.includes(d.id.toString()))
-        .map((d) => `${d.name} (${d.code})`)
+        .map((d) => `${d.number} (${d.code})`)
         .join(", ") || ""
     }
   >
@@ -172,7 +172,7 @@ export default function PDFReport() {
       device.id !== undefined ? (
         <MenuItem key={device.id} value={device.id.toString()}>
           <Checkbox checked={selectedDeviceIds.includes(device.id.toString())} />
-          <ListItemText primary={`${device.name} (${device.code})`} />
+          <ListItemText primary={`${device.number} (${device.code})`} />
         </MenuItem>
       ) : null
     )}
