@@ -20,10 +20,24 @@ Button{
 }
 .all-devices-top {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 20px !important;
   margin-bottom: 24px;
+  width: 100%;
+}
+
+.search-input {
+  flex: 1;
+  max-width: 400px;
+}
+
+.add-device {
+  white-space: nowrap;
+}
+
+/* Make the TextField grow to fill remaining space */
+.all-devices-top .MuiTextField-root {
+  flex-grow: 1;
 }
 
 /* Responsive adjustments */

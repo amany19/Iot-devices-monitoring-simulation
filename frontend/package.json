@@ -17,6 +17,7 @@
     "@mui/lab": "^7.0.0-beta.14",
     "@mui/material": "^7.2.0",
     "@mui/x-date-pickers": "^8.8.0",
+    "@mui/x-date-pickers-pro": "^8.8.0",
     "@tailwindcss/vite": "^4.1.11",
     "bootstrap": "^5.3.7",
     "date-fns": "^4.1.0",

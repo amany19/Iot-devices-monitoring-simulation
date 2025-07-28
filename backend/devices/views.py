@@ -1,7 +1,7 @@
 from django.shortcuts import render
 from rest_framework import viewsets
-from .models import Device
-from .serializers import DeviceSerializer
+from .models import Alarm, Device, Manufacturer
+from .serializers import AlarmSerializer, DeviceSerializer
 from .serializers import ReadingSerializer
 from rest_framework.decorators import action
 from rest_framework.response import Response
@@ -9,6 +9,7 @@ from rest_framework import status
 from django.http import HttpResponse
 from reportlab.pdfgen import canvas
 from io import BytesIO
+import os
 import zipfile 
 from datetime import datetime,time
 from reportlab.lib.pagesizes import A4
@@ -17,13 +18,22 @@ import matplotlib.pyplot as plt
 from django.utils.dateparse import parse_datetime
 import matplotlib
 import matplotlib.dates as mdates
+from reportlab.lib import colors
 from rest_framework.parsers import JSONParser
+from .simulation import backfill_readings
+from .serializers import ManufacturerSerializer
+
+
 matplotlib.use('Agg')  # Use non-GUI backend for rendering
 
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-
+    def perform_create(self, serializer):
+        device = serializer.save()
+        # Backfill readings for the device
+        backfill_readings(device)
+        print(f"Backfilled readings for device: {device.name}")
     def _get_readings_for_device(self, device, start=None, end=None):
         readings = device.readings.all().order_by('timestamp')
         if start:
@@ -31,23 +41,26 @@ class DeviceViewSet(viewsets.ModelViewSet):
         if end:
             readings = readings.filter(timestamp__lte=end)
         return readings
-    def _generate_pdf_device_report(seld,device,readings):
-        buffer = BytesIO() 
+    def _generate_pdf_device_report(self, device, readings):
+        buffer = BytesIO()
+
+        # Extract readings
         temps = [r.temperature for r in readings]
         hums = [r.humidity for r in readings]
         times = [r.timestamp for r in readings]
-        temp_max, temp_min, temp_avg = max(temps), min(temps), sum(temps)/len(temps)
-        hum_max, hum_min, hum_avg = max(hums), min(hums), sum(hums)/len(hums)
 
-        #Temperature Graph
+        temp_max, temp_min, temp_avg = max(temps), min(temps), sum(temps) / len(temps)
+        hum_max, hum_min, hum_avg = max(hums), min(hums), sum(hums) / len(hums)
+
+        # Generate Temperature Graph
         temp_graph_buf = BytesIO()
         plt.figure(figsize=(10, 3))
         plt.plot(times, temps, label='Temperature', color='red')
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
         plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
-        plt.xlabel('Timestamp')
-        plt.ylabel('Temperature (°C)')
-        plt.title(f'{device.name} - Temperature Over Time')
+        plt.xlabel('Timestamp',weight='bold')
+        plt.ylabel('Temperature (°C)',weight='bold')
+        plt.title(f'Device {device.number}  {device.code}- Temperature Over Time',weight='bold')
         plt.grid(True)
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -55,15 +68,15 @@ class DeviceViewSet(viewsets.ModelViewSet):
         plt.close()
         temp_graph_buf.seek(0)
 
-        # Humidity Graph
+        # Generate Humidity Graph
         hum_graph_buf = BytesIO()
         plt.figure(figsize=(10, 3))
         plt.plot(times, hums, label='Humidity', color='blue')
         plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
         plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
-        plt.xlabel('Timestamp')
-        plt.ylabel('Humidity (%)')
-        plt.title(f'{device.name} - Humidity Over Time')
+        plt.xlabel('Timestamp',weight='bold')
+        plt.ylabel('Humidity (%)',weight='bold')
+        plt.title(f'{device.name} - Humidity Over Time',weight='bold')
         plt.grid(True)
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -71,42 +84,164 @@ class DeviceViewSet(viewsets.ModelViewSet):
         plt.close()
         hum_graph_buf.seek(0)
 
-        #Start PDF Report
+        # Start PDF
         c = canvas.Canvas(buffer, pagesize=A4)
         width, height = A4
 
         # Header
-        c.setFont("Helvetica-Bold", 18)
-        c.drawString(200, height - 50, "Device Data Report")
+        c.setFont("Helvetica-Bold", 28)
+        c.drawCentredString(width / 2, height - 50, "Data Report")
 
-        # Device Info
-        c.setFont("Helvetica-Bold", 14)
-        c.drawString(100, height - 80, device.name)
-        c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, height - 120, "Device Information:")
-        c.setFont("Helvetica", 10)
-        c.drawString(70, height - 140, f"Model: {device.code}")
-        c.drawString(250, height - 140, f"Location: {device.location}")
-        c.drawString(70, height - 160, f"Status: {device.status}")
-        c.drawString(250, height - 160, f"Created at: {device.created_at.strftime('%Y-%m-%d')}")
+        # Device name as link-style
+        c.setFont("Helvetica-Bold", 20)
+        c.setFillColorRGB(0, 0.7, 1)
+        c.drawCentredString(width / 2, height - 80, device.code)
 
-        # Summary Stats
-        y = height - 200
+        # Logo
+        logo_path = "./assets/goveeIcon.png"
+
+        if os.path.exists(logo_path):
+            # c.drawImage(logo_path, width - 80, height - 80, width=40, preserveAspectRatio=True)
+            c.drawImage(logo_path,  30, height - 60, width=40, preserveAspectRatio=True, mask='auto')
+
+        else:
+            print(f"Logo not found at: {logo_path}")
+
+        # Room Name
         c.setFont("Helvetica-Bold", 12)
-        c.drawString(50, y, "Summary:")
-        y -= 20
+        c.setFillColor(colors.black)
+        c.drawString(50, height - 100, "Location: ")
+        c.setFillColorRGB(0, 0.6, 1)
+        c.drawString(110, height - 100, device.location)
+
+        # Device Information Section
+        c.setFont("Helvetica-Bold", 12)
+        c.setFillColorRGB(0, 0.75, 0.85)
+        c.rect(50, height - 125, width - 100, 20, fill=1, stroke=0)
+        c.setFillColor(colors.black)
+        c.drawString(55, height - 120, "Device Information")
+        c.setFillColor(colors.black)
+        # First row
         c.setFont("Helvetica-Bold", 10)
-        c.drawString(70, y, f"Temperature - Max: {temp_max:.2f}, Min: {temp_min:.2f}, Avg: {temp_avg:.2f}")
-        y -= 15
-        c.drawString(70, y, f"Humidity - Max: {hum_max:.2f}, Min: {hum_min:.2f}, Avg: {hum_avg:.2f}")
+        c.drawString(60, height - 140, "Device Model:")
+        c.setFont("Helvetica", 10)
+        c.drawString(140, height - 140, device.code)
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(250, height - 140, "Probe Type:")
+        c.setFont("Helvetica", 10)
+        c.drawString(370, height - 140, "Temperature & Humidity")
+
+        # Second row
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(60, height - 155, "Serial Number:")
+        c.setFont("Helvetica", 10)
+
+        c.drawString(140, height - 155, getattr(device, 'serial_number', None) or 'N/A')
+
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(250, height - 155, "Firmware Version:")
+        c.setFont("Helvetica", 10)
+        c.drawString(370, height - 155, "V5.10")
+
+        # Device Settings
+        c.setFont("Helvetica-Bold", 12)
+        c.setFillColorRGB(0, 0.75, 0.85)
+        c.rect(50, height - 180, width - 100, 20, fill=1, stroke=0)
+        c.setFillColor(colors.black)
+        c.drawString(55, height - 175, "Device Settings")
+        c.setFillColor(colors.black)
+        c.setFont("Helvetica-Bold", 10)
+        c.drawString(60, height - 195, "Button stop: ")
+        c.drawString(60, height - 210, "Mute Button:")
+        c.drawString(60, height - 225, "Alarm Tone: ")
+        c.drawString(250, height - 195, "Logging Interval: ")
+        c.drawString(250, height - 210, "Alarm Logging Interval: ")
+        c.drawString(250, height - 225, "Storage Mode: ")
+
+        #Values
+        c.setFont("Helvetica", 10)
+        c.drawString(140, height - 195,"Disable")
+        c.drawString(140, height - 210, "Disable")
+        c.drawString(140, height - 225, "Enable")
+
+        c.drawString(370, height - 195, "15m")
+        c.drawString(370, height - 210, "15m")
+        c.drawString(370, height - 225, "Loop")
+
+        # Alarm Status
+        c.setFont("Helvetica-Bold", 12)
+        c.setFillColorRGB(0, 0.75, 0.85)
+
+        c.rect(50, height - 250, width - 100, 20, fill=1, stroke=0)
+        c.setFillColor(colors.black)
+        c.drawString(55, height - 245, "Alarm Status")
+        c.setFont("Helvetica", 10)
+        c.setFillColorRGB(0.2, 0.2, 0.8)
+        c.drawString(60, height - 265, "There are no available alarms.")
+        c.setFillColor(colors.black)
+
+        # Summary
+        c.setFont("Helvetica-Bold", 12)
+        c.setFillColorRGB(0, 0.75, 0.85)
+        c.rect(50, height - 295, width - 100, 20, fill=1, stroke=0)
+        c.setFillColor(colors.black)
+        c.drawString(55, height - 290, "Summary")
+
+        # Summary Title
+        c.setFont("Helvetica-Bold", 12)
+        c.setFillColorRGB(0, 0.75, 0.85)
+        c.rect(50, height - 295, width - 100, 20, fill=1, stroke=0)
+        c.setFillColor(colors.black)
+        c.drawString(55, height - 290, "Summary")
+
+        # --- Temperature Table ---
+        c.setFillColorRGB(0.2, 0.4, 1)
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(110, height - 320, "Temperature")
+
+        # Table content
+        y = height - 340
+        c.setFillColor(colors.black)
+
+        temp_labels = ["Maximum:", "Minimum:", "Average:"]
+        temp_values = [f"{temp_max:.1f}", f"{temp_min:.1f}", f"{temp_avg:.2f}"]
+
+        for label, value in zip(temp_labels, temp_values):
+            c.setFont("Helvetica-Bold", 10)
+            c.drawString(90, y, label)
+            c.setFont("Helvetica", 10)
+            c.drawString(160, y, value)
+            y -= 15
+
+        # --- Humidity Table ---
+        c.setFillColorRGB(0.2, 0.4, 1)
+        c.setFont("Helvetica-Bold", 11)
+        c.drawString(400, height - 320, "Humidity")
+
+        # Table content
+        y = height - 340
+        c.setFillColor(colors.black)
+
+        hum_labels = ["Maximum:", "Minimum:", "Average:"]
+        hum_values = [f"{hum_max:.1f}", f"{hum_min:.1f}", f"{hum_avg:.2f}"]
+
+        for label, value in zip(hum_labels, hum_values):
+            c.setFont("Helvetica-Bold", 10)
+            c.drawString(380, y, label)
+            c.setFont("Helvetica", 10)
+            c.drawString(450, y, value)
+            y -= 15
 
         # Insert Temperature Graph
-        y -= 220
+        c.setFont("Helvetica-Bold", 10)
+
+        y = height - 550
         temp_img = ImageReader(temp_graph_buf)
         c.drawImage(temp_img, 70, y, width=450, height=150)
 
-        # Insert Humidity Graph below or on next page
-        if y - 180 < 50:  # in case no space
+        # Insert Humidity Graph
+        if y - 180 < 50:
             c.showPage()
             y = height - 80
         else:
@@ -208,3 +343,31 @@ from .serializers import ReadingSerializer
 class ReadingViewSet(viewsets.ModelViewSet):
     queryset = Reading.objects.all()
     serializer_class = ReadingSerializer
+#Alarms
+class AlarmViewSet(viewsets.ModelViewSet):
+    queryset = Alarm.objects.all().order_by('-timestamp')
+    serializer_class = AlarmSerializer
+
+    def get_queryset(self):
+        queryset = super().get_queryset()
+        device_id = self.request.query_params.get('device')
+        acknowledged = self.request.query_params.get('acknowledged')
+        active = self.request.query_params.get('active')
+
+        if device_id:
+            queryset = queryset.filter(device_id=device_id)
+        if acknowledged is not None:
+            queryset = queryset.filter(acknowledged=acknowledged.lower() == 'true')
+        if active is not None:
+            queryset = queryset.filter(active=active.lower() == 'true')
+
+        return queryset
+    @action(detail=True, methods=['patch'], url_path='acknowledge')
+    def acknowledge(self, request, pk=None):
+        alarm = self.get_object()
+        alarm.acknowledged = True
+        alarm.save()
+        return Response({'status': 'acknowledged'}, status=status.HTTP_200_OK)
+class ManufacturerViewSet(viewsets.ModelViewSet):
+    queryset = Manufacturer.objects.all()
+    serializer_class = ManufacturerSerializer

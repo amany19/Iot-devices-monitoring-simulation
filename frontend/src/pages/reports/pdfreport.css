@@ -1,3 +1,18 @@
+.pdf-report-container {
+    max-width: 1280px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+ 
+     
+   
+}
+.date-picker-container {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
 h1{
     color: #0f5c53;
     margin-bottom: 5rem !important;

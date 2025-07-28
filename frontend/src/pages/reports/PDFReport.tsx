@@ -93,9 +93,9 @@ export default function PDFReport() {
   };
 
   return (
-    <div>
+    <div className="pdf-report-container">
       <h1>Generate PDF Report</h1>
-      <div style={{ display: "flex", gap: "1rem", marginBottom: "1rem" }}>
+      <div className="date-picker-container">
         <LocalizationProvider dateAdapter={AdapterDateFns}>
           <DatePicker
             disableFuture
@@ -108,12 +108,13 @@ export default function PDFReport() {
                 setStartTime(normalized);
               }
             }}
-            slotProps={{ textField: { fullWidth: true } }}
+            slotProps={{ textField: { fullWidth: true, variant:"filled", className:"input-field"} }}
           />
           <DatePicker
             disableFuture
             label="End Date"
             value={endTime}
+            
             onChange={(newValue: Date | null) => {
               if (newValue) {
                 const normalized = new Date(newValue);
@@ -121,7 +122,7 @@ export default function PDFReport() {
                 setEndTime(normalized);
               }
             }}
-            slotProps={{ textField: { fullWidth: true } }}
+            slotProps={{ textField: { fullWidth: true , variant:"filled", className:"input-field"} }}
           />
         </LocalizationProvider>
       </div>
@@ -132,7 +133,8 @@ export default function PDFReport() {
         fullWidth
         value={selectionId}
         onChange={(e) => setSelectionId(e.target.value)}
-        variant="outlined"
+         
+        variant="filled" className="input-field"
         size="small"
         sx={{ mb: 2 }}
       >

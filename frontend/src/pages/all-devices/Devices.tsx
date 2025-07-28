@@ -4,7 +4,8 @@ import { mockDevices } from "../../mockData/mockDevices";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "reactstrap";
-import { TextField } from "@mui/material";
+import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
+import SearchIcon from '@mui/icons-material/Search';
 type DeviceCardProps = {
   device: {
     id: string;
@@ -19,11 +20,15 @@ type DeviceCardProps = {
 export default function Devices() {
   const navigate = useNavigate();
   const [devices, setDevices] = useState(mockDevices);
+  const [filteredDevices, setFilteredDevices] = useState(devices);
 
   const fetchDevices = () => {
     fetch("http://localhost:8000/api/devices")
       .then((res) => res.json())
-      .then((data) => setDevices(data))
+      .then((data) => {
+        setDevices(data);
+        setFilteredDevices(data);
+      })
       .catch(() => setDevices(mockDevices));
   };
 
@@ -32,30 +37,80 @@ export default function Devices() {
   }, []);
 
   const onDeleteSuccess = () => {
+    console.log("On delete success called ")
     fetchDevices();
   };
-  const [searchQuery, setSearchQuery] = useState("");
-
-  // Optionally, you can filter devices based on searchQuery:
-  // const filteredDevices = devices.filter(device =>
-  //   device.name.toLowerCase().includes(searchQuery.toLowerCase())
-  // );
-
+   const [searchQuery, setSearchQuery] = useState("");
+  const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchQuery(event.target.value);
+    const searchQuery = event.target.value;
+    const filterationh = devices.filter(device =>
+      device.code.toLowerCase().includes(searchQuery.toLowerCase()))
+    setFilteredDevices(filterationh)
+      ;
+    if (searchQuery === "") {
+      setFilteredDevices(devices);
+    }
+  }
+  useEffect(() => {
+    setFilteredDevices(devices);
+  }, [devices]);
+  // const handleSearchClick = () => {
+  //   const filteration = devices.filter(device =>
+  //     device.code.toLowerCase().includes(searchQuery.toLowerCase())
+  //   );
+  //   setFilteredDevices(filteration);
+  // };
   return (
     <div>
-      <div className="all-devices-top"><TextField
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          gap: 2, // 16px spacing
+          mb: 3, // 24px bottom margin
+          width: '100%',
+        }}
+      >
 
-        variant="outlined"
-        size="small"
-        fullWidth
-        value={searchQuery}
-        onChange={(e) => setSearchQuery(e.target.value)}
-        sx={{ mb: 2 }}
-      />
-        <Button className="default-button" onClick={() => navigate("/devices/new")}>
-          + Add Device
-        </Button>
-      </div>
+        <TextField
+          variant="outlined"
+          size="small"
+          sx={{ flexGrow: 1, maxWidth: '600px', mx: 'auto', flexBasis: '100%' }}
+   
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+            
+                  <SearchIcon />
+                 
+              </InputAdornment>
+            ),
+          }}
+          placeholder="Search by device code"
+          value={searchQuery}
+          onChange={handleSearchChange}
+
+        />
+       
+        {/* <IconButton
+          onClick={handleSearchClick}
+          aria-label="search devices" >
+          <SearchIcon />
+
+        </IconButton> */}
+<Box sx={{ flexShrink: 0 }}>
+      <Button
+      className="default-button"
+        variant="contained"
+        onClick={() => navigate("/devices/new")}
+ 
+      >
+        + Add Device
+      </Button>
+    </Box>
+      </Box>
 
       <div className="devices-container">
         <div
@@ -66,7 +121,7 @@ export default function Devices() {
             gap: "24px",
           }}
         >
-          {devices.map((device) => (
+          {filteredDevices.map((device) => (
             <DeviceCard
               onDeleteSuccess={onDeleteSuccess}
               key={device.id}

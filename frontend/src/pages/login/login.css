@@ -1,7 +1,7 @@
 .form-wrapper {
     display: flex;
     align-content: center;
-
+    background-color: #ffff !important;
     flex-direction: column;
     padding: 60px 40px 40px 40px;
     width: 600px;
@@ -22,8 +22,8 @@
 }
 
 .MuiMenuItem-root {
-  text-align: left;
-  justify-content: flex-start;
+    text-align: left;
+    justify-content: flex-start;
 }
 
 .login-form-container {
@@ -31,13 +31,15 @@
     width: 100%;
     gap: 20px;
     flex-direction: column;
-    background-color: #ffff !important;
+     background-color: #ffff !important;
+
+
 
 
 }
 
 .input-field {
-    background-color: #ffff !important;
+    background-color: #f5f5f5 !important;
     margin-left: 0%;
     width: 100%;
 

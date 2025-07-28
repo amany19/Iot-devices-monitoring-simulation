@@ -78,7 +78,7 @@ export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) 
 
         <CardContent>
           <h2>{device.code}</h2>
-          <h3>{device.name}</h3>
+          <h3>Device number{device.number}</h3>
           <p>Location: {device.location}</p>
           <div>
             Status

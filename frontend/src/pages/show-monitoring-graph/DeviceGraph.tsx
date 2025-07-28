@@ -15,7 +15,7 @@ export default function DeviceGraph({ data }: Props) {
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid stroke="#ccc" />
-          <XAxis dataKey="timestamp" tickFormatter={(t) => new Date(t).toLocaleTimeString()} />
+          <XAxis dataKey="timestamp" tickFormatter={(t) => new Date(t).toLocaleDateString()} />
           <YAxis />
           <Tooltip />
           <Line type="monotone" dataKey="temperature" stroke="#991b12ff" name="Temperature (°C)" />
@@ -26,7 +26,7 @@ export default function DeviceGraph({ data }: Props) {
       <ResponsiveContainer width="100%" height={300}>
         <LineChart data={data}>
           <CartesianGrid stroke="#ccc" />
-          <XAxis dataKey="timestamp" tickFormatter={(t) => new Date(t).toLocaleTimeString()} />
+          <XAxis dataKey="timestamp" tickFormatter={(t) => new Date(t).toLocaleDateString()} />
           <YAxis />
           <Tooltip />
           <Line type="monotone" dataKey="humidity" stroke="#055d91ff" name="Humidity (%)" />

@@ -11,6 +11,9 @@ import DevicesIcon from '@mui/icons-material/Devices';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Link, useLocation } from 'react-router-dom';
 import AssessmentOutlined from'@mui/icons-material/AssessmentOutlined'
+import NotificationsIcon from '@mui/icons-material/Notifications';
+import FactoryIcon from '@mui/icons-material/Factory';
+
 const drawerWidth = 240;
 
 interface SidebarProps {
@@ -24,7 +27,10 @@ export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const navItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
     { text: 'Devices', icon: <DevicesIcon />, path: '/devices' },
+    { text: 'Manufacturer', icon: <FactoryIcon />, path: '/manufacturer' },
+   
     { text: 'Reports', icon: <AssessmentOutlined />, path: '/reports' },
+    { text: 'Alarms', icon: <NotificationsIcon />, path: '/alarms' },
     { text: 'Logout', icon: <LogoutIcon />, path: '/logout' },
   ];
 

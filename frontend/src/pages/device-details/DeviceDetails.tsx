@@ -10,7 +10,6 @@ import "./deviceDetails.css";
 
 export default function DevicesDetails() {
   const { id } = useParams<{ id: string }>();
-
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [device, setDevice] = useState<DeviceType | null>(null);
@@ -49,6 +48,7 @@ export default function DevicesDetails() {
         );
         if (!response.ok) throw new Error("Failed to fetch device readings");
         const deviceReadings = await response.json();
+        console.log(deviceReadings);
         setReadings(deviceReadings);
       } catch (error) {
         console.error(error);

@@ -3,6 +3,15 @@
     color: #E5E7EB !important; /* Dark text */
  
 }
+.nav-conatiner{
+    display: flex;
+    flex-direction: row !important;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 20px;
+    background-color: #111827; /* Dark Gray */
+    color: #E5E7EB; /* Light Gray */
+}
 .sidebar-wrapper {
   
       flex-direction: column;

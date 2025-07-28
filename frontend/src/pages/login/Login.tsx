@@ -98,10 +98,10 @@ function Login() {
                         fullWidth
                     />
 
-                    <Button variant="contained" type="submit" >Login</Button>
+                    <Button className="default-button" variant="contained" type="submit" >Login</Button>
 
                 </div>
-                <p>Don't have account? <Link to="/register">Register</Link></p>
+                
 
             </Box>
 
