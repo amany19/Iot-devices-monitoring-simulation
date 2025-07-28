@@ -105,10 +105,7 @@ export default function Alarms() {
 
   return (
     <Container>
-      <Box display="flex" justifyContent="space-between" alignItems="center" my={2}>
-        <Typography variant="h3">Alarms</Typography>
-      </Box>
-
+ 
 
       {/* 
       <TextField

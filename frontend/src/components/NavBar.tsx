@@ -9,16 +9,20 @@ interface NavbarProps {
   onToggleDrawer: () => void;
 }
 import { useState, useEffect } from 'react';
+import { useAlarmContext } from '../context/AlarmContext';
 export default function Navbar({ onToggleDrawer }: NavbarProps) {
   const navigate = useNavigate();
   const [alarms, setAlarms] = useState<AlarmType[]>([]);
+  const { unacknowledgedCount } = useAlarmContext();
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const fetchAlarms = () => {
     fetch("http://localhost:8000/api/alarms/?active=true")
       .then((res) => res.json())
-      .then((data) => setAlarms(data))
+      .then((data) => {setAlarms(data)
+ 
+      })
       .catch(() => setAlarms([]));
   };
 
@@ -74,7 +78,7 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
               : 'transparent',
         }}
       >
-        <Badge badgeContent={alarms.length} color="error">
+        <Badge badgeContent={unacknowledgedCount } color="error">
           <NotificationsIcon />
         </Badge>
       </IconButton>
