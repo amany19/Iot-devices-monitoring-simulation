@@ -12,20 +12,22 @@ import { useState, useEffect } from 'react';
 export default function Navbar({ onToggleDrawer }: NavbarProps) {
   const navigate = useNavigate();
   const [alarms, setAlarms] = useState<AlarmType[]>([]);
+  const [achnowledgedNum, setAchnowledgedNum] = useState<number>(0);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
 
   const fetchAlarms = () => {
     fetch("http://localhost:8000/api/alarms/?active=true")
       .then((res) => res.json())
-      .then((data) => setAlarms(data))
-      .catch(() => setAlarms([]));
+      .then((data) => {setAlarms(data)})
+      .catch(() => setAlarms([]));789889987
   };
 
   useEffect(() => {
     fetchAlarms();
   }, []);
 
+  
   const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
