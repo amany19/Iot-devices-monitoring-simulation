@@ -20,17 +20,21 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
   const fetchAlarms = () => {
     fetch("http://localhost:8000/api/alarms/?active=true")
       .then((res) => res.json())
-      .then((data) => {setAlarms(data)
- 
+      .then((data) => {
+        setAlarms(data)
+
       })
       .catch(() => setAlarms([]));
   };
 
   useEffect(() => {
     fetchAlarms();
+    const intervalId = setInterval(fetchAlarms, 10000);  //Later will be replaced with web socket or SSE
+    return () => clearInterval(intervalId);
   }, []);
 
-  
+
+
   const handleNotificationClick = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
   };
@@ -79,7 +83,7 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
               : 'transparent',
         }}
       >
-        <Badge badgeContent={unacknowledgedCount } color="error">
+        <Badge badgeContent={unacknowledgedCount} color="error">
           <NotificationsIcon />
         </Badge>
       </IconButton>

@@ -1,21 +1,21 @@
 import { useEffect, useState } from 'react';
-import { 
-  Button, 
-  Box, 
-  TextField, 
-  MenuItem, 
-  FormLabel, 
-  Stack, 
-  FormGroup, 
-    Select,
-  FormControlLabel, 
+import {
+  Button,
+  Box,
+  TextField,
+  MenuItem,
+  FormLabel,
+  Stack,
+  FormGroup,
+  Select,
+  FormControlLabel,
   Switch,
-  
-  Alert 
+
+  Alert
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { DateTimePicker  } from '@mui/x-date-pickers/DateTimePicker';
+import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import './addDevice.css';
@@ -45,10 +45,10 @@ function AddDevice() {
     alert_humidity_min: null,
     alert_humidity_max: null,
     logging_interval_minutes: 15,
-    button_stop_enabled: true,
-    mute_button_enabled: true,
-    alarm_tone_enabled: true,
-    storage_mode: '',
+    button_stop_enabled: false,
+    mute_button_enabled: false,
+    alarm_tone_enabled: false,
+    storage_mode: 'Loop',
     started_at: undefined,
   };
 
@@ -58,7 +58,7 @@ function AddDevice() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
 
- 
+
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
     setFormData((prev) => ({ ...prev, [name]: checked }));
@@ -125,8 +125,8 @@ function AddDevice() {
 
     try {
       // Combine user-selected date with current time
-      const started_at = startDate 
-        ? new Date(startDate.setHours(new Date().getHours(), new Date().getMinutes()))
+      const started_at = startDate
+        ? new Date(startDate)
         : new Date();
 
       const response = await fetch('http://localhost:8000/api/devices/', {
@@ -144,9 +144,9 @@ function AddDevice() {
 
       if (!response.ok) {
         throw new Error(
-          data.detail || 
-          data.message || 
-          Object.values(data).join(', ') || 
+          data.detail ||
+          data.message ||
+          Object.values(data).join(', ') ||
           'Failed to add device'
         );
       }
@@ -155,42 +155,42 @@ function AddDevice() {
       setFormData(initialDevice);
       setStartDate(null);
       setSubmitSuccess(true);
-      
+
     } catch (error) {
       setSubmitError(error instanceof Error ? error.message : 'An unknown error occurred');
       console.error('Submission error:', error);
     }
   };
-const [manufacturers, setManufacturers] = useState<ManufacturerType[]>([]);
+  const [manufacturers, setManufacturers] = useState<ManufacturerType[]>([]);
 
-useEffect(() => {
-  const fetchManufacturers = async () => {
-    try {
-      const res = await fetch('/api/manufacturers/');
-      const data = await res.json();
-      setManufacturers(data);
-    } catch (error) {
-      console.error('Error fetching manufacturers:', error);
-    }
+  useEffect(() => {
+    const fetchManufacturers = async () => {
+      try {
+        const res = await fetch('/api/manufacturers/');
+        const data = await res.json();
+        setManufacturers(data);
+      } catch (error) {
+        console.error('Error fetching manufacturers:', error);
+      }
+    };
+
+    fetchManufacturers();
+  }, []);
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: name.includes('_min') || name.includes('_max') || name === 'number' || name === 'logging_interval_minutes'
+        ? Number(value)
+        : value,
+    }));
+    setErrors((prev) => ({
+      ...prev,
+      [name]: '',
+    }));
   };
-
-  fetchManufacturers();
-}, []);
-const handleChange = (
-  e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | SelectChangeEvent
-) => {
-  const { name, value } = e.target;
-  setFormData((prev) => ({
-    ...prev,
-    [name]: name.includes('_min') || name.includes('_max') || name === 'number' || name === 'logging_interval_minutes'
-      ? Number(value)
-      : value,
-  }));
-  setErrors((prev) => ({
-    ...prev,
-    [name]: '',
-  }));
-};
 
 
   return (
@@ -217,7 +217,7 @@ const handleChange = (
               <TextField
                 id="number"
                 name="number"
-                value={formData.number}
+                value={formData.number?formData.number:0}
                 onChange={handleChange}
                 error={Boolean(errors.number)}
                 helperText={errors.number}
@@ -269,26 +269,26 @@ const handleChange = (
               onChange={handleChange}
             />
 
-<FormGroup>
-  <FormLabel required htmlFor="manufacturer" sx={{ mb: 0.5 }}>
-    Manufacturer
-  </FormLabel>
-  <Select
-    id="manufacturer"
-    name="manufacturer"
-    value={formData.manufacturer ?? ''}
-    onChange={handleChange}
-    variant="filled"
-    className="input-field"
-    fullWidth
-  >
-    {manufacturers.map((m) => (
-      <MenuItem key={m.id} value={m.id}>
-        {m.name}
-      </MenuItem>
-    ))}
-  </Select>
-</FormGroup>
+            <FormGroup>
+              <FormLabel required htmlFor="manufacturer" sx={{ mb: 0.5 }}>
+                Manufacturer
+              </FormLabel>
+              <Select
+                id="manufacturer"
+                name="manufacturer"
+                value={formData.manufacturer ?? ''}
+                onChange={handleChange}
+                variant="filled"
+                className="input-field"
+                fullWidth
+              >
+                {manufacturers.map((m) => (
+                  <MenuItem key={m.id} value={m.id}>
+                    {m.name}
+                  </MenuItem>
+                ))}
+              </Select>
+            </FormGroup>
 
             <FormLabel htmlFor="serial_number" sx={{ mb: 0.5 }}>
               Serial number
@@ -452,6 +452,9 @@ const handleChange = (
               Logging Interval (minutes)
             </FormLabel>
             <TextField
+              InputProps={{
+                readOnly: true
+              }}
               variant="filled"
               className="input-field"
               id="logging_interval_minutes"
@@ -466,18 +469,20 @@ const handleChange = (
             <TextField
               variant="filled"
               className="input-field"
-            
+              InputProps={{
+                readOnly: true
+              }}
               name="storage_mode"
               id="storage_mode"
-              value={formData.storage_mode ?? ''}
+              value={formData.storage_mode ?? 'Loop'}
               onChange={handleChange}
             />
             <FormLabel htmlFor="started_at" sx={{ mb: 0.5 }}>
               Start Date (optional)
             </FormLabel>
-            <DateTimePicker 
+            <DateTimePicker
               disableFuture
-                
+
               value={startDate}
               onChange={handleDateChange}
               slotProps={{

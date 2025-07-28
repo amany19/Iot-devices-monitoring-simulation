@@ -9,6 +9,7 @@ import OpacityIcon from '@mui/icons-material/Opacity';
 import PowerSettingsNewIcon from '@mui/icons-material/PowerSettingsNew';
 
 import type Alarm from '../../types/alarm';
+import { useAlarmContext } from "../../context/AlarmContext";
 export default function Alarms() {
   const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Alarm[]>([]);
@@ -84,15 +85,16 @@ export default function Alarms() {
         return { icon: null, color: "default" };
     }
   }
-  const acknowledgeAlarm = async (id: number) => {
+  const { decreaseCount } = useAlarmContext();
+  const acknowledgeAlarm = async (alarmId: number) => {
     try {
-      const res = await fetch(`http://localhost:8000/api/alarms/${id}/acknowledge/`, {
+      const res = await fetch(`http://localhost:8000/api/alarms/${alarmId}/acknowledge/`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
       });
-
+      decreaseCount();
       if (res.ok) {
         fetchNotifications(); // refresh the list
       } else {
@@ -105,7 +107,7 @@ export default function Alarms() {
 
   return (
     <Container>
- 
+
 
       {/* 
       <TextField
