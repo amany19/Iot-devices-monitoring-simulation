@@ -15,7 +15,7 @@ import {
 } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
 
-import { DatePicker } from '@mui/x-date-pickers/DatePicker';
+import { DateTimePicker  } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
 import './addDevice.css';
@@ -475,7 +475,7 @@ const handleChange = (
             <FormLabel htmlFor="started_at" sx={{ mb: 0.5 }}>
               Start Date (optional)
             </FormLabel>
-            <DatePicker
+            <DateTimePicker 
               disableFuture
                 
               value={startDate}

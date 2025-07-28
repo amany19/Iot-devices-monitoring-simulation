@@ -38,7 +38,7 @@
 
 }
 
-.input-field {
+.input-field .MuiFilledInput-root {
     background-color: #f5f5f5 !important;
     margin-left: 0%;
     width: 100%;

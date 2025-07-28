@@ -10,9 +10,7 @@ interface NavbarProps {
 }
 import { useState, useEffect } from 'react';
 export default function Navbar({ onToggleDrawer }: NavbarProps) {
-   const navigate = useNavigate();
-   
- 
+  const navigate = useNavigate();
   const [alarms, setAlarms] = useState<AlarmType[]>([]);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const open = Boolean(anchorEl);
@@ -35,16 +33,16 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
   const handleClose = () => {
     setAnchorEl(null);
   };
- 
-   const onDeleteSuccess = () => {
-     fetchAlarms();
-   };
-   
+
+  const onDeleteSuccess = () => {
+    fetchAlarms();
+  };
+
   return (
-    <AppBar  className="nav-conatiner" position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
+    <AppBar className="nav-conatiner" position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>
 
       <Toolbar>
-        
+
         <IconButton
           color="inherit"
           edge="start"
@@ -54,7 +52,7 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
           <MenuIcon />
         </IconButton>
 
-       
+
         <Box sx={{ display: 'flex', alignItems: 'center' }}>
           <img
             src={goveeLogo}
@@ -62,59 +60,62 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
             style={{ height: 40, marginRight: 10 }}
           />
           <Typography variant="h6" noWrap>
-            
+
           </Typography>
         </Box>
       </Toolbar>
-       <IconButton
-            color="inherit"
-            onClick={handleNotificationClick}
-            sx={{
-              bgcolor:
-                location.pathname.split('/')[1] === 'alarms'
-                  ? '#0D9488'
-                  : 'transparent',
+      <IconButton
+        color="inherit"
+        onClick={handleNotificationClick}
+        sx={{
+          bgcolor:
+            location.pathname.split('/')[1] === 'alarms'
+              ? '#0D9488'
+              : 'transparent',
+        }}
+      >
+        <Badge badgeContent={alarms.length} color="error">
+          <NotificationsIcon />
+        </Badge>
+      </IconButton>
+
+      <Menu
+        anchorEl={anchorEl}
+        open={open}
+        onClose={handleClose}
+        PaperProps={{
+          style: {
+            maxHeight: 300,
+            width: '300px',
+          },
+        }}
+      >
+        {alarms.slice(0, 5).map((alarm) => (
+          <MenuItem key={alarm.id} onClick={() => {
+            handleClose();
+            navigate('/alarms');
+          }}>
+            <Typography variant="body2">
+              🔔 {alarm.alarm_type} – Device {alarm.device}
+              <br />
+              <small>{new Date(alarm.timestamp).toLocaleString()}</small>
+            </Typography>
+          </MenuItem>
+        ))}
+
+        {alarms.length > 5 && (
+          <MenuItem
+            onClick={() => {
+              handleClose();
+              navigate('/alarms');
             }}
           >
-            <Badge badgeContent={alarms.length} color="error">
-              <NotificationsIcon />
-            </Badge>
-          </IconButton>
-
-          <Menu
-            anchorEl={anchorEl}
-            open={open}
-            onClose={handleClose}
-            PaperProps={{
-              style: {
-                maxHeight: 300,
-                width: '300px',
-              },
-            }}
-          >
-            {alarms.slice(0, 5).map((alarm) => (
-              <MenuItem key={alarm.id} onClick={handleClose}>
-                <Typography variant="body2">
-                  🔔 {alarm.alarm_type} – Device {alarm.device}
-                  <br />
-                  <small>{new Date(alarm.timestamp).toLocaleString()}</small>
-                </Typography>
-              </MenuItem>
-            ))}
-
-            {alarms.length > 5 && (
-              <MenuItem
-                onClick={() => {
-                  handleClose();
-                  navigate('/alarms');
-                }}
-              >
-                <Button fullWidth variant="text" color="primary">
-                  View All
-                </Button>
-              </MenuItem>
-            )}
-          </Menu>
+            <Button fullWidth variant="text" color="primary">
+              View All
+            </Button>
+          </MenuItem>
+        )}
+      </Menu>
     </AppBar>
   );
 }
