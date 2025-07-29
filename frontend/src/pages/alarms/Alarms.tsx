@@ -79,6 +79,11 @@ export default function Alarms() {
         return { icon: <OpacityIcon />, color: "darkblue" };
       case "HUM_LO":
         return { icon: <OpacityIcon />, color: "#bedbfcff" };
+      case "SD":
+        return { icon: <PowerSettingsNewIcon />, color: "#292a2bff" };
+
+      case "MD":
+        return { icon: <PowerSettingsNewIcon />, color: "#292a2bff" };
       case "DC":
         return { icon: <PowerSettingsNewIcon />, color: "#292a2bff" };
       default:

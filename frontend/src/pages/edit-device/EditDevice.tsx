@@ -85,7 +85,7 @@ function EditDevice() {
     fetchDevice();
     fetchManufacturers();
   }, [id]);
-
+ 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }>
   ) => {

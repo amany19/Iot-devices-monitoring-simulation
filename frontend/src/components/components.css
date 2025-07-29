@@ -66,6 +66,12 @@
     position: absolute !important;
      right: 8px !important;
      top:  8px!important }
+.card-edit-icon{
+    color: #0D9488 !important;
+        position: absolute !important;
+     right: 28px !important;
+     top:  8px!important 
+}
 .device-card:hover {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     transform: translateY(-2px);        }

@@ -83,7 +83,7 @@ DATABASES = {
         'PORT': config('DATABASE_PORT'),
     }
 }
-
+AUTH_USER_MODEL = 'users.CustomUser'
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {

@@ -7,6 +7,8 @@ import Button from '@mui/material/Button';
 import PowerRounded from '@mui/icons-material/PowerRounded';
 import DeleteForeverIcon from '@mui/icons-material/DeleteForever';
 import { Alert, IconButton, Snackbar, Typography } from "@mui/material";
+import EditIcon from '@mui/icons-material/Edit';
+import { useNavigate } from "react-router-dom";
 
 type Props = {
   device: Device;
@@ -18,6 +20,7 @@ export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) 
   const [isDeleting, setIsDeleting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
+  const navigate = useNavigate();
 
   // Track snackbar state updates
   useEffect(() => {
@@ -76,6 +79,16 @@ export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) 
           <DeleteForeverIcon color={isDeleting ? "disabled" : "error"} />
         </IconButton>
 
+        <IconButton
+          className="card-edit-icon"
+
+          sx={{ color: '#111827' }}
+          aria-label="edit manufacturer"
+                   onClick={() => navigate(`/devices/${device.id}/edit`)}
+
+        >
+          <EditIcon />
+        </IconButton>
         <CardContent>
           <h2>{device.code}</h2>
           <h3>Device number{device.number}</h3>

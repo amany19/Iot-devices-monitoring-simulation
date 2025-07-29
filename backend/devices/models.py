@@ -58,6 +58,8 @@ class Alarm(models.Model):
         ('HUM_HI', 'Humidity Too High'),
         ('HUM_LO', 'Humidity Too Low'),
         ('DC', 'Device Disconnected'),
+        ('SD', 'Stop button disabled'),
+        ('MD', 'Mute Button disabled'),
     )
 
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='alarms')
@@ -72,6 +74,6 @@ class Alarm(models.Model):
 
     def user_message(self):
         label = self.get_alarm_type_display()
-        if self.alarm_type != 'DC' and self.triggered_value is not None:
+        if self.alarm_type not in ('DC','SD','MD') and self.triggered_value is not None:
             return f"{label}: {self.triggered_value}"
         return label
