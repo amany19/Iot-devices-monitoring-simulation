@@ -36,7 +36,8 @@ schema_view = get_schema_view(
 urlpatterns = [
     path('', lambda request: redirect('/api/')),  
     path('admin/', admin.site.urls),
-    path('api/',include('devices.urls'))
+    path('api/',include('devices.urls')),
+    path('', include('users.urls')),
    
 
 ]

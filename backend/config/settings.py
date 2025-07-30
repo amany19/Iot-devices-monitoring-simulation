@@ -15,7 +15,7 @@ ALLOWED_HOSTS = ['localhost', '127.0.0.1']
 
 # Application definition
 INSTALLED_APPS = [
-    'django.contrib.admin',
+    
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
@@ -24,10 +24,16 @@ INSTALLED_APPS = [
     'rest_framework',
     'drf_yasg',
     'corsheaders',
-    
     'devices.apps.DevicesConfig', 
-    'users',
+    'users.apps.UsersConfig',  
+    'django.contrib.admin',
 ]
+
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    )
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -83,7 +89,6 @@ DATABASES = {
         'PORT': config('DATABASE_PORT'),
     }
 }
-AUTH_USER_MODEL = 'users.CustomUser'
 # Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {
@@ -111,3 +116,4 @@ STATIC_URL = 'static/'
 
 # Default primary key field type
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+AUTH_USER_MODEL = 'users.CustomUser'
