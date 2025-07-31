@@ -37,7 +37,7 @@ urlpatterns = [
     path('', lambda request: redirect('/api/')),  
     path('admin/', admin.site.urls),
     path('api/',include('devices.urls')),
-    path('', include('users.urls')),
+    path('api/', include('users.urls')),
    
 
 ]

@@ -16,10 +16,9 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { DateTimePicker } from '@mui/x-date-pickers/DateTimePicker';
 import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
- 
+
 import type Device from '../../types/device';
 import type { ManufacturerType } from '../../types/index ';
- 
 
 interface DeviceFormData extends Omit<Device, 'id' | 'readings'> {
   started_at?: Date;
@@ -85,9 +84,9 @@ function EditDevice() {
     fetchDevice();
     fetchManufacturers();
   }, [id]);
- 
+
   const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | React.ChangeEvent<{ name?: string; value: unknown }>
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement> | import('@mui/material').SelectChangeEvent<string>
   ) => {
     const { name, value } = e.target;
     if (!name) return;
@@ -256,13 +255,13 @@ function EditDevice() {
             <Select
               id="manufacturer"
               name="manufacturer"
-              value={formData.manufacturer}
+              value={formData.manufacturer?.toString() ?? ''}
               onChange={handleChange}
               variant="filled"
               fullWidth
             >
-              {manufacturers.map((m) => (
-                <MenuItem key={m.id} value={m.id}>
+              {manufacturers.map((m,index) => (
+                <MenuItem key={m.id ?? `manufacturer-${index}`} value={m.id ?? ''}>
                   {m.name}
                 </MenuItem>
               ))}
@@ -302,8 +301,97 @@ function EditDevice() {
               <MenuItem value="off">Off</MenuItem>
             </TextField>
 
-            {/* Add temperature, humidity, alerts, switches, and started_at fields same as AddDevice.tsx */}
-            {/* For brevity, not duplicating here — copy them directly from AddDevice.tsx */}
+            <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                name="temperature_min"
+                label="Min"
+                type="number"
+                value={formData.temperature_min}
+                onChange={handleChange}
+                error={Boolean(errors.temperature_min)}
+                helperText={errors.temperature_min}
+                variant="filled"
+                fullWidth
+              />
+              <TextField
+                name="temperature_max"
+                label="Max"
+                type="number"
+                value={formData.temperature_max}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+              />
+            </Stack>
+
+            <FormLabel sx={{ mt: 2 }}>Normal Humidity Range (%)</FormLabel>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                name="humidity_min"
+                label="Min"
+                type="number"
+                value={formData.humidity_min}
+                onChange={handleChange}
+                error={Boolean(errors.humidity_min)}
+                helperText={errors.humidity_min}
+                variant="filled"
+                fullWidth
+              />
+              <TextField
+                name="humidity_max"
+                label="Max"
+                type="number"
+                value={formData.humidity_max}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+              />
+            </Stack>
+
+            <FormLabel sx={{ mt: 2 }}>Alert Temperature Range (°C)</FormLabel>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                name="alert_temp_min"
+                label="Min"
+                type="number"
+                value={formData.alert_temp_min ?? ''}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+              />
+              <TextField
+                name="alert_temp_max"
+                label="Max"
+                type="number"
+                value={formData.alert_temp_max ?? ''}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+              />
+            </Stack>
+
+            <FormLabel sx={{ mt: 2 }}>Alert Humidity Range (%)</FormLabel>
+            <Stack direction="row" spacing={2}>
+              <TextField
+                name="alert_humidity_min"
+                label="Min"
+                type="number"
+                value={formData.alert_humidity_min ?? ''}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+              />
+              <TextField
+                name="alert_humidity_max"
+                label="Max"
+                type="number"
+                value={formData.alert_humidity_max ?? ''}
+                onChange={handleChange}
+                variant="filled"
+                fullWidth
+              />
+            </Stack>
 
             <FormLabel htmlFor="started_at">Start Date</FormLabel>
             <DateTimePicker

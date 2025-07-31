@@ -12,9 +12,12 @@ import Alarms from './pages/alarms/Alarms';
 import ManufacturerPage from './pages/manufacturer/Manufacturer';
 import { AlarmProvider } from './context/AlarmContext';
 import EditDevice from './pages/edit-device/EditDevice';
+import Dashboard from './pages/dashboard/Dashboard';
+import AddUser from './pages/add-user/AddUser';
 
 function App() {
   return (
+    
    <AlarmProvider>
 
     <BrowserRouter>
@@ -28,6 +31,8 @@ function App() {
         <Route path="/alarms" element={<Layout><Alarms /></Layout>} />
         <Route path="/manufacturer" element={<Layout><ManufacturerPage /></Layout>} />
         <Route path="/login" element={<Login/>} />
+        <Route path="/add-user" element={<Layout><AddUser/></Layout>} />
+        <Route path="/dashboard" element={<Layout><Dashboard/></Layout>} />
       </Routes>
     </BrowserRouter>
    </AlarmProvider>

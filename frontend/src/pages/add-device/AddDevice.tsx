@@ -194,7 +194,7 @@ function AddDevice() {
 
 
   return (
-    <div className="add-device-form-wrapper">
+    <div className="add-form-wrapper">
       <LocalizationProvider dateAdapter={AdapterDateFns}>
         <Box component="form" noValidate onSubmit={handleSubmit} autoComplete="on">
           <div className="login-form-container">

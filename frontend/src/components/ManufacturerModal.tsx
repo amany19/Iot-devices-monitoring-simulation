@@ -49,7 +49,7 @@ export default function ManufacturerModal({
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Cancel</Button>
-        <Button variant="contained" onClick={handleSubmit}>
+        <Button variant="contained"className='default-button' onClick={handleSubmit}>
           Save
         </Button>
       </DialogActions>

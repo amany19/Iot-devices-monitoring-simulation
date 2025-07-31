@@ -1,15 +1,13 @@
-.add-form-wrapper{
-  margin-top: 80px;
-  width: 800;
-}
-.form-container{
-    margin: 20% 20% 20% 20%;
- 
+.add-device-container{
+    display: flex;
+    width: 100%;
+    gap: 20px;
+    flex-direction: column;
+    background-color: #ffff !important;
 }
 .MuiFormLabel-root {
 font-weight: bold !important;
 color: #0f5c53 !important;
-
 
 }
 .MuiSelect-filled {

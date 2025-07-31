@@ -498,4 +498,21 @@ class AlarmViewSet(viewsets.ModelViewSet):
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
+from rest_framework.decorators import api_view, permission_classes
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.response import Response
+from devices.models import Device, Reading, Alarm
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def dashboard_stats(request):
+    device_count = Device.objects.count()
+    alarm_count = Alarm.objects.filter(acknowledged=False).count()
+    reading_count = Reading.objects.count()
+
+    return Response({
+        'devices': device_count,
+        'alarms': alarm_count,
+        'readings': reading_count,
+    })
  

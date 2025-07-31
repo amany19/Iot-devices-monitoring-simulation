@@ -13,7 +13,7 @@ import { Link, useLocation } from 'react-router-dom';
 import AssessmentOutlined from'@mui/icons-material/AssessmentOutlined'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FactoryIcon from '@mui/icons-material/Factory';
-
+import GroupIcon from '@mui/icons-material/Group';
 const drawerWidth = 240;
 
 interface SidebarProps {
@@ -23,15 +23,16 @@ interface SidebarProps {
 
 export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation();
-
+const role = localStorage.getItem('role');
   const navItems = [
     { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-    { text: 'Devices', icon: <DevicesIcon />, path: '/devices' },
-    { text: 'Manufacturer', icon: <FactoryIcon />, path: '/manufacturer' },
-   
-    { text: 'Reports', icon: <AssessmentOutlined />, path: '/reports' },
-    { text: 'Alarms', icon: <NotificationsIcon />, path: '/alarms' },
-    { text: 'Logout', icon: <LogoutIcon />, path: '/logout' },
+{ text: 'Users', icon: <GroupIcon />, path: '/add-user',roles:['super_admin','admin','user']},
+
+    { text: 'Devices', icon: <DevicesIcon />, path: '/devices', roles:['super_admin','admin','user']},
+    { text: 'Manufacturer', icon: <FactoryIcon />, path: '/manufacturer',roles:['super_admin','admin','user']},
+    { text: 'Reports', icon: <AssessmentOutlined />, path: '/reports',roles:['super_admin','admin','user']},
+    { text: 'Alarms', icon: <NotificationsIcon />, path: '/alarms',roles:['super_admin','admin','user']},
+    { text: 'Logout', icon: <LogoutIcon />, path: '/logout',roles:['super_admin','admin','user']},
   ];
 
   const drawerContent = (
