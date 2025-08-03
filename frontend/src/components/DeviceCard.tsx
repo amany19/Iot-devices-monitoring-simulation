@@ -21,6 +21,7 @@ export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) 
   const [error, setError] = useState<string | null>(null);
   const [showSuccess, setShowSuccess] = useState(false);
   const navigate = useNavigate();
+  const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
 
   // Track snackbar state updates
   useEffect(() => {
@@ -66,11 +67,11 @@ export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) 
       setIsDeleting(false);
     }
   };
-
+console.log(role)
   return (
     <Fragment>
       <Card className="device-card">
-        <IconButton
+{       ['super_admin','admin'].includes(role)&&( <><IconButton
           className="card-delete-icon"
           onClick={handleDelete}
           disabled={isDeleting}
@@ -88,7 +89,7 @@ export default function DeviceCard({ device, onClick, onDeleteSuccess }: Props) 
 
         >
           <EditIcon />
-        </IconButton>
+        </IconButton></>)}
         <CardContent>
           <h2>{device.code}</h2>
           <h3>Device number{device.number}</h3>

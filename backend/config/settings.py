@@ -27,6 +27,7 @@ INSTALLED_APPS = [
     'devices.apps.DevicesConfig', 
     'users.apps.UsersConfig',  
     'django.contrib.admin',
+    'audit',
 ]
 
 REST_FRAMEWORK = {
@@ -41,10 +42,13 @@ MIDDLEWARE = [
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',   
+    'audit.middleware.CurrentUserMiddleware',                   
+    'simple_history.middleware.HistoryRequestMiddleware',         
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
+
 
 # CORS Settings (Development)
 CORS_ALLOW_ALL_ORIGINS = True  # Allows all origins - only for development!

@@ -14,7 +14,8 @@ import { AlarmProvider } from './context/AlarmContext';
 import EditDevice from './pages/edit-device/EditDevice';
 import Dashboard from './pages/dashboard/Dashboard';
 import AddUser from './pages/add-user/AddUser';
-
+import InjectReadings from './pages/inject-readings/InjectReadings'
+import Audit from './pages/audit/Audit'
 function App() {
   return (
     
@@ -32,6 +33,8 @@ function App() {
         <Route path="/manufacturer" element={<Layout><ManufacturerPage /></Layout>} />
         <Route path="/login" element={<Login/>} />
         <Route path="/add-user" element={<Layout><AddUser/></Layout>} />
+        <Route path="/inject-readings" element={<Layout><InjectReadings/></Layout>} />
+        <Route path="/audit" element={<Layout><Audit/></Layout>} />
         <Route path="/dashboard" element={<Layout><Dashboard/></Layout>} />
       </Routes>
     </BrowserRouter>

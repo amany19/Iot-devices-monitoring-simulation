@@ -38,8 +38,8 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('api/',include('devices.urls')),
     path('api/', include('users.urls')),
-   
-
+    path('api/', include('audit.urls')),
+     
 ]
  #Swagger & ReDoc urls
 if settings.DEBUG:

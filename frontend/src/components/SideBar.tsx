@@ -10,7 +10,7 @@ import DashboardIcon from '@mui/icons-material/Dashboard';
 import DevicesIcon from '@mui/icons-material/Devices';
 import LogoutIcon from '@mui/icons-material/Logout';
 import { Link, useLocation } from 'react-router-dom';
-import AssessmentOutlined from'@mui/icons-material/AssessmentOutlined'
+import AssessmentOutlined from '@mui/icons-material/AssessmentOutlined'
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import FactoryIcon from '@mui/icons-material/Factory';
 import GroupIcon from '@mui/icons-material/Group';
@@ -20,31 +20,39 @@ interface SidebarProps {
   mobileOpen: boolean;
   onClose: () => void;
 }
-
+type NavItemsType = {
+  text: string;
+  icon: any;
+  path: string;
+  roles: string[]
+}
 export default function Sidebar({ mobileOpen, onClose }: SidebarProps) {
   const location = useLocation();
-const role = localStorage.getItem('role');
-  const navItems = [
-    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard' },
-{ text: 'Users', icon: <GroupIcon />, path: '/add-user',roles:['super_admin','admin','user']},
-
-    { text: 'Devices', icon: <DevicesIcon />, path: '/devices', roles:['super_admin','admin','user']},
-    { text: 'Manufacturer', icon: <FactoryIcon />, path: '/manufacturer',roles:['super_admin','admin','user']},
-    { text: 'Reports', icon: <AssessmentOutlined />, path: '/reports',roles:['super_admin','admin','user']},
-    { text: 'Alarms', icon: <NotificationsIcon />, path: '/alarms',roles:['super_admin','admin','user']},
-    { text: 'Logout', icon: <LogoutIcon />, path: '/logout',roles:['super_admin','admin','user']},
+  const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
+  //  console.log(role)
+  const navItems: NavItemsType[] = [
+    { text: 'Dashboard', icon: <DashboardIcon />, path: '/dashboard', roles: ['super_admin'] },
+    { text: 'Users', icon: <GroupIcon />, path: '/add-user', roles: ['super_admin', 'admin'] },
+    { text: 'Audit', icon: <GroupIcon />, path: '/audit', roles: ['super_admin', 'admin'] },
+    { text: 'Devices', icon: <DevicesIcon />, path: '/devices', roles: ['super_admin', 'admin', 'user'] },
+    { text: 'Manufacturer', icon: <FactoryIcon />, path: '/manufacturer', roles: ['super_admin', 'admin'] },
+    { text: 'Readings', icon: <LogoutIcon />, path: '/inject-readings', roles: ['super_admin'] },
+    { text: 'Reports', icon: <AssessmentOutlined />, path: '/reports', roles: ['super_admin', 'admin', 'user'] },
+    { text: 'Alarms', icon: <NotificationsIcon />, path: '/alarms', roles: ['super_admin', 'admin', 'user'] },
+    { text: 'Logout', icon: <LogoutIcon />, path: '/logout', roles: ['super_admin', 'admin', 'user'] },
   ];
 
   const drawerContent = (
-    <div style={{ backgroundColor: '#111827', height: '100%', color: '#E5E7EB' ,marginTop: '50px'}}>
+    <div style={{ backgroundColor: '#111827', height: '100%', color: '#E5E7EB', marginTop: '50px' }}>
       <Toolbar />
       <List>
         {navItems.map((item) => {
           const currentRootPath = '/' + location.pathname.split('/')[1];
           const isActive = currentRootPath === item.path;
 
+
           return (
-            <ListItemButton
+            (item.roles?.includes(role)) && (<ListItemButton
               key={item.text}
               component={Link}
               to={item.path}
@@ -63,7 +71,7 @@ const role = localStorage.getItem('role');
                 {item.icon}
               </ListItemIcon>
               <ListItemText primary={item.text} />
-            </ListItemButton>
+            </ListItemButton>)
           );
         })}
       </List>

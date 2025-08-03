@@ -1,3 +1,4 @@
+import random
 from django.shortcuts import render
 from rest_framework import viewsets
 from .models import Alarm, Device, Manufacturer
@@ -22,6 +23,9 @@ from reportlab.lib import colors
 from rest_framework.parsers import JSONParser
 from .simulation import backfill_readings
 from .serializers import ManufacturerSerializer
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.decorators import api_view, permission_classes
+from audit.models import AuditLog
 
 # from devices.reports.pdf_generator import generate_pdf_device_report
 
@@ -30,11 +34,45 @@ matplotlib.use('Agg')  # Use non-GUI backend for rendering
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
+
     def perform_create(self, serializer):
         device = serializer.save()
         # Backfill readings for the device
         backfill_readings(device)
         print(f"Backfilled readings for device: {device.code}")
+
+        # ✅ Audit log
+        AuditLog.objects.create(
+            user=self.request.user if self.request.user.is_authenticated else None,
+            action='CREATE',
+            model_name='Device',
+            object_id=str(device.id),
+            changes=f"Device '{device.code}' created"
+        )
+
+    def perform_update(self, serializer):
+        device = serializer.save()
+
+        # ✅ Audit log
+        AuditLog.objects.create(
+            user=self.request.user if self.request.user.is_authenticated else None,
+            action='UPDATE',
+            model_name='Device',
+            object_id=str(device.id),
+            changes=f"Device '{device.code}' updated"
+        )
+
+    def perform_destroy(self, instance):
+        # ✅ Audit log
+        AuditLog.objects.create(
+            user=self.request.user if self.request.user.is_authenticated else None,
+            action='DELETE',
+            model_name='Device',
+            object_id=str(instance.id),
+            changes=f"Device '{instance.code}' deleted"
+        )
+        instance.delete()
+        
     def _get_readings_for_device(self, device, start=None, end=None):
         readings = device.readings.all().order_by('timestamp')
         if start:
@@ -451,6 +489,35 @@ from .serializers import ReadingSerializer
 class ReadingViewSet(viewsets.ModelViewSet):
     queryset = Reading.objects.all()
     serializer_class = ReadingSerializer
+    @action(detail=False, methods=['post'], url_path='inject')
+    def inject_readings(self, request):
+        mode = request.data.get('device_mode')
+        device_ids = request.data.get('device_ids', [])
+        start_time = parse_datetime(request.data.get('start_time'))
+        end_time = parse_datetime(request.data.get('end_time'))
+        temp_min = float(request.data.get('temp_min'))
+        temp_max = float(request.data.get('temp_max'))
+        hum_min = float(request.data.get('hum_min'))
+        hum_max = float(request.data.get('hum_max'))
+
+        if mode == 'all':
+            readings = Reading.objects.filter(timestamp__gte=start_time, timestamp__lte=end_time)
+        elif mode == 'single' or mode == 'multiple':
+            readings = Reading.objects.filter(device_id__in=device_ids, timestamp__gte=start_time, timestamp__lte=end_time)
+        else:
+            return Response({"error": "Invalid mode"}, status=400)
+
+        updated_count = 0
+        for reading in readings:
+            reading.temperature = temp_min if temp_min == temp_max else round(random.uniform(temp_min, temp_max), 2)
+            reading.humidity = hum_min if hum_min == hum_max else round(random.uniform(hum_min, hum_max), 2)
+            reading.save()
+            updated_count += 1
+
+        return Response({"message": f"{updated_count} readings updated"})
+
+
+
 #Alarms
 class AlarmViewSet(viewsets.ModelViewSet):
     queryset = Alarm.objects.all().order_by('-timestamp')
@@ -498,6 +565,38 @@ class AlarmViewSet(viewsets.ModelViewSet):
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
+    def perform_create(self, serializer):
+        manufacturer = serializer.save()
+        # ✅ Log creation
+        AuditLog.objects.create(
+            user=self.request.user,
+            action='CREATE',
+            model_name='Manufacturer',
+            object_id=str(manufacturer.id),
+            changes=f"Manufacturer '{manufacturer.name}' created"
+        )
+
+    def perform_update(self, serializer):
+        manufacturer = serializer.save()
+        # ✅ Log update
+        AuditLog.objects.create(
+            user=self.request.user,
+            action='UPDATE',
+            model_name='Manufacturer',
+            object_id=str(manufacturer.id),
+            changes=f"Manufacturer '{manufacturer.name}' updated"
+        )
+
+    def perform_destroy(self, instance):
+        # ✅ Log delete before deleting
+        AuditLog.objects.create(
+            user=self.request.user,
+            action='DELETE',
+            model_name='Manufacturer',
+            object_id=str(instance.id),
+            changes=f"Manufacturer '{instance.name}' deleted"
+        )
+        instance.delete()
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response

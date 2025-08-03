@@ -1,12 +1,14 @@
 import uuid
 from django.db import models
 from django.utils import timezone
+from simple_history.models import HistoricalRecords
+
 # Create your models here.
 class Manufacturer(models.Model):
     name = models.CharField(max_length=100, unique=True)
     # country = models.CharField(max_length=100, blank=True, null=True)
     # website = models.URLField(blank=True, null=True)
-
+    history = HistoricalRecords()
     def __str__(self):
         return self.name
 
@@ -41,7 +43,7 @@ class Device (models.Model):
 
     storage_mode = models.CharField(max_length=100, blank=True, null=True)
     started_at = models.DateTimeField(default=timezone.now)
-
+    history = HistoricalRecords()
     def __str__(self):
         return self.name
 

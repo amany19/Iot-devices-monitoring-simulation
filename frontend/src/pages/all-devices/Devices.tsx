@@ -4,23 +4,15 @@ import { mockDevices } from "../../mockData/mockDevices";
 import { useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { Button } from "reactstrap";
-import { Box, IconButton, InputAdornment, TextField } from "@mui/material";
+import { Box,  InputAdornment, TextField } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
-type DeviceCardProps = {
-  device: {
-    id: string;
-    name: string;
-    type: string;
-    status: string;
-  };
-  onClick?: () => void;
-};
-
+ 
 
 export default function Devices() {
   const navigate = useNavigate();
   const [devices, setDevices] = useState(mockDevices);
   const [filteredDevices, setFilteredDevices] = useState(devices);
+  const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
 
   const fetchDevices = () => {
     fetch("http://localhost:8000/api/devices")
@@ -40,7 +32,7 @@ export default function Devices() {
     console.log("On delete success called ")
     fetchDevices();
   };
-   const [searchQuery, setSearchQuery] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
   const handleSearchChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(event.target.value);
     const searchQuery = event.target.value;
@@ -78,13 +70,13 @@ export default function Devices() {
           variant="outlined"
           size="small"
           sx={{ flexGrow: 1, maxWidth: '600px', mx: 'auto', flexBasis: '100%' }}
-   
+
           InputProps={{
             endAdornment: (
               <InputAdornment position="end">
-            
-                  <SearchIcon />
-                 
+
+                <SearchIcon />
+
               </InputAdornment>
             ),
           }}
@@ -93,23 +85,23 @@ export default function Devices() {
           onChange={handleSearchChange}
 
         />
-       
+
         {/* <IconButton
           onClick={handleSearchClick}
           aria-label="search devices" >
           <SearchIcon />
 
         </IconButton> */}
-<Box sx={{ flexShrink: 0 }}>
-      <Button
-      className="default-button"
-        variant="contained"
-        onClick={() => navigate("/devices/new")}
- 
-      >
-        + Add Device
-      </Button>
-    </Box>
+        {['super_admin', 'admin'].includes(role) && (<Box sx={{ flexShrink: 0 }}>
+          <Button
+            className="default-button"
+            variant="contained"
+            onClick={() => navigate("/devices/new")}
+
+          >
+            + Add Device
+          </Button>
+        </Box>)}
       </Box>
 
       <div className="devices-container">

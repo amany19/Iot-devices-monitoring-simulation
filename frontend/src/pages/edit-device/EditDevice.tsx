@@ -58,6 +58,7 @@ function EditDevice() {
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [manufacturers, setManufacturers] = useState<ManufacturerType[]>([]);
+  const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
 
   useEffect(() => {
     const fetchDevice = async () => {
@@ -260,7 +261,7 @@ function EditDevice() {
               variant="filled"
               fullWidth
             >
-              {manufacturers.map((m,index) => (
+              {manufacturers.map((m, index) => (
                 <MenuItem key={m.id ?? `manufacturer-${index}`} value={m.id ?? ''}>
                   {m.name}
                 </MenuItem>
@@ -301,53 +302,55 @@ function EditDevice() {
               <MenuItem value="off">Off</MenuItem>
             </TextField>
 
-            <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
-            <Stack direction="row" spacing={2}>
-              <TextField
-                name="temperature_min"
-                label="Min"
-                type="number"
-                value={formData.temperature_min}
-                onChange={handleChange}
-                error={Boolean(errors.temperature_min)}
-                helperText={errors.temperature_min}
-                variant="filled"
-                fullWidth
-              />
-              <TextField
-                name="temperature_max"
-                label="Max"
-                type="number"
-                value={formData.temperature_max}
-                onChange={handleChange}
-                variant="filled"
-                fullWidth
-              />
-            </Stack>
+            {['super_admin', 'admin'].includes(role) && (
+              <>
+                <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    name="temperature_min"
+                    label="Min"
+                    type="number"
+                    value={formData.temperature_min}
+                    onChange={handleChange}
+                    error={Boolean(errors.temperature_min)}
+                    helperText={errors.temperature_min}
+                    variant="filled"
+                    fullWidth
+                  />
+                  <TextField
+                    name="temperature_max"
+                    label="Max"
+                    type="number"
+                    value={formData.temperature_max}
+                    onChange={handleChange}
+                    variant="filled"
+                    fullWidth
+                  />
+                </Stack>
 
-            <FormLabel sx={{ mt: 2 }}>Normal Humidity Range (%)</FormLabel>
-            <Stack direction="row" spacing={2}>
-              <TextField
-                name="humidity_min"
-                label="Min"
-                type="number"
-                value={formData.humidity_min}
-                onChange={handleChange}
-                error={Boolean(errors.humidity_min)}
-                helperText={errors.humidity_min}
-                variant="filled"
-                fullWidth
-              />
-              <TextField
-                name="humidity_max"
-                label="Max"
-                type="number"
-                value={formData.humidity_max}
-                onChange={handleChange}
-                variant="filled"
-                fullWidth
-              />
-            </Stack>
+                <FormLabel sx={{ mt: 2 }}>Normal Humidity Range (%)</FormLabel>
+                <Stack direction="row" spacing={2}>
+                  <TextField
+                    name="humidity_min"
+                    label="Min"
+                    type="number"
+                    value={formData.humidity_min}
+                    onChange={handleChange}
+                    error={Boolean(errors.humidity_min)}
+                    helperText={errors.humidity_min}
+                    variant="filled"
+                    fullWidth
+                  />
+                  <TextField
+                    name="humidity_max"
+                    label="Max"
+                    type="number"
+                    value={formData.humidity_max}
+                    onChange={handleChange}
+                    variant="filled"
+                    fullWidth
+                  /></Stack> </>)}
+
 
             <FormLabel sx={{ mt: 2 }}>Alert Temperature Range (°C)</FormLabel>
             <Stack direction="row" spacing={2}>
@@ -392,20 +395,20 @@ function EditDevice() {
                 fullWidth
               />
             </Stack>
-
-            <FormLabel htmlFor="started_at">Start Date</FormLabel>
-            <DateTimePicker
-              disableFuture
-              value={startDate}
-              onChange={handleDateChange}
-              slotProps={{
-                textField: {
-                  variant: 'filled',
-                  fullWidth: true,
-                },
-              }}
-            />
-
+            {['super_admin', 'admin'].includes(role) && (<>
+              <FormLabel htmlFor="started_at">Start Date</FormLabel>
+              <DateTimePicker
+                disableFuture
+                value={startDate}
+                onChange={handleDateChange}
+                slotProps={{
+                  textField: {
+                    variant: 'filled',
+                    fullWidth: true,
+                  },
+                }}
+              />
+            </>)}
             <FormControlLabel
               control={
                 <Switch

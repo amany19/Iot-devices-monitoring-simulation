@@ -5,6 +5,9 @@
     flex-direction: column;
     background-color: #ffff !important;
 }
+.form-container{
+    
+}
 .MuiFormLabel-root {
 font-weight: bold !important;
 color: #0f5c53 !important;
