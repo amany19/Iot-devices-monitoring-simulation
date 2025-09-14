@@ -130,11 +130,12 @@ function AddDevice() {
       const started_at = startDate
         ? new Date(startDate)
         : new Date();
-
+const accessToken = localStorage.getItem('access');
       const response = await fetch('http://localhost:8000/api/devices/', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
         },
         body: JSON.stringify({
           ...formData,

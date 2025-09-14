@@ -46,8 +46,8 @@ function Login() {
       newErrors.password = 'Password is required';
       isValid = false;
     } else if (formData.password.length < 6) {
-    //   newErrors.password = 'Password must be at least 6 characters';
-    //   isValid = false;
+      //   newErrors.password = 'Password must be at least 6 characters';
+      //   isValid = false;
     }
 
     setErrors(newErrors);
@@ -60,7 +60,7 @@ function Login() {
     if (!validate()) return;
 
     try {
-     
+
       const res = await fetch('/api/token/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -76,7 +76,7 @@ function Login() {
       localStorage.setItem('access', data.access);
       localStorage.setItem('refresh', data.refresh);
 
-       
+
       const userRes = await fetch('/api/users/me/', {
         headers: {
           Authorization: `Bearer ${data.access}`,
@@ -87,7 +87,8 @@ function Login() {
 
       const user = await userRes.json();
       localStorage.setItem('role', user.role);
-
+      localStorage.setItem('username', user.username);
+      localStorage.setItem('user_id', user.id.toString());
       // 3. Redirect based on role
       if (user.role === 'super_admin') {
         navigate('/dashboard');
@@ -103,51 +104,51 @@ function Login() {
 
   return (
     <div className='login-page'>
-    <div className="form-wrapper">
-      <Box
-        className="login-form-container"
-        component="form"
-        noValidate
-        onSubmit={handleSubmit}
-        autoComplete="on"
-      >
-        <div className="login-form-container">
-          <TextField
-            id="filled-username-input"
-            name="username"
-            label="Username"
-            className="input-field"
-            variant="filled"
-            value={formData.username}
-            onChange={handleChange}
-            error={Boolean(errors.username)}
-            helperText={errors.username}
-            fullWidth
-          />
+      <div className="form-wrapper">
+        <Box
+          className="login-form-container"
+          component="form"
+          noValidate
+          onSubmit={handleSubmit}
+          autoComplete="on"
+        >
+          <div className="login-form-container">
+            <TextField
+              id="filled-username-input"
+              name="username"
+              label="Username"
+              className="input-field"
+              variant="filled"
+              value={formData.username}
+              onChange={handleChange}
+              error={Boolean(errors.username)}
+              helperText={errors.username}
+              fullWidth
+            />
 
-          <TextField
-            id="filled-password-input"
-            label="Password"
-            name="password"
-            type="password"
-            className="input-field"
-            autoComplete="current-password"
-            variant="filled"
-            value={formData.password}
-            onChange={handleChange}
-            error={Boolean(errors.password)}
-            helperText={errors.password}
-            fullWidth
-          />
+            <TextField
+              id="filled-password-input"
+              label="Password"
+              name="password"
+              type="password"
+              className="input-field"
+              autoComplete="current-password"
+              variant="filled"
+              value={formData.password}
+              onChange={handleChange}
+              error={Boolean(errors.password)}
+              helperText={errors.password}
+              fullWidth
+            />
 
-          {loginError && <Alert severity="error">{loginError}</Alert>}
+            {loginError && <Alert severity="error">{loginError}</Alert>}
 
-          <Button className="default-button" variant="contained" type="submit">
-            Login
-          </Button>
-        </div>
-      </Box>
-    </div>
+            <Button className="default-button" variant="contained" type="submit">
+              Login
+            </Button>
+          </div>
+        </Box>
+      </div>
     </div>
   );
 }

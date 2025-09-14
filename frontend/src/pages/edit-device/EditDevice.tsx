@@ -163,17 +163,19 @@ function EditDevice() {
     setSubmitSuccess(false);
 
     if (!validate()) return;
-
+  const username=localStorage.getItem('username')
     try {
       const updatedDevice = {
         ...formData,
         started_at: startDate?.toISOString() ?? null,
+        user: username,
       };
-
+const accessToken = localStorage.getItem('access');
       const res = await fetch(`/api/devices/${id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
         },
         body: JSON.stringify(updatedDevice),
       });

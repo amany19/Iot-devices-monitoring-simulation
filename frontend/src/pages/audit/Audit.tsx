@@ -32,7 +32,7 @@ export default function Audit() {
           {logs.map((log, index) => (
             <TableRow key={index}>
               <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
-              <TableCell>{log.user}</TableCell>
+              <TableCell>{log.username}</TableCell>
               <TableCell>{log.action}</TableCell>
               <TableCell>{log.model_name}</TableCell>
               <TableCell>{log.object_id}</TableCell>

@@ -54,7 +54,9 @@ class DeviceViewSet(viewsets.ModelViewSet):
         device = serializer.save()
 
         # ✅ Audit log
+        print(self.request.user)
         AuditLog.objects.create(
+
             user=self.request.user if self.request.user.is_authenticated else None,
             action='UPDATE',
             model_name='Device',
@@ -324,7 +326,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 y_pos = height - 50
             
             # Table setup
-            col_widths = [150, 100, 100]  # Timestamp, Temp, Humidity
+            col_widths = [166, 164, 164]  # Timestamp, Temp, Humidity
             row_height = 20
             header_height = y_pos - 45
             data_start = header_height - row_height
@@ -342,7 +344,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
             # Draw table rows with data
             c.setFont("Helvetica", 9)
             current_y = data_start
-            rows_per_page = 15  # Number of rows that fit on a page
+            rows_per_page = 36 # Number of rows that fit on a page
             
             for i, reading in enumerate(table_data):
                 if i > 0 and i % rows_per_page == 0:
