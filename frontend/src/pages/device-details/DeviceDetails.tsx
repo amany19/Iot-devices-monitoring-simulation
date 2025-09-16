@@ -23,11 +23,16 @@ export default function DevicesDetails() {
     setEndTime(now);
   }, []);
 
-
+const accessToken = localStorage.getItem('access')
   useEffect(() => {
     const fetchDeviceData = async () => {
       try {
-        const response = await fetch(`/api/devices/${id}/`);
+        const response = await fetch(`/api/devices/${id}/`,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        }},);
         if (!response.ok) throw new Error("Failed to fetch device data");
         const deviceData = await response.json();
         setDevice(deviceData);
@@ -45,7 +50,12 @@ export default function DevicesDetails() {
       try {
         const response = await fetch(
           `/api/devices/${id}/readings/?start=${startTime?.toISOString()}&end=${endTime?.toISOString()}`
-        );
+        ,{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        }},)
         if (!response.ok) throw new Error("Failed to fetch device readings");
         const deviceReadings = await response.json();
         console.log(deviceReadings);

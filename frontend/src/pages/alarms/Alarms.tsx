@@ -57,8 +57,8 @@ export default function Alarms() {
       filtered = filtered.filter((alarm) => alarm.alarm_type.startsWith("TEMP"));
     } else if (filter === "humidity") {
       filtered = filtered.filter((alarm) => alarm.alarm_type.startsWith("HUM"));
-    } else if (filter in ["dc","md","sd"]) {
-      filtered = filtered.filter((alarm) => alarm.alarm_type === "DC");
+    } else if (filter ==="dc") {
+      filtered = filtered.filter((alarm) => ["DC","MD","SD"].includes(alarm.alarm_type));
     }
 
     if (query) {

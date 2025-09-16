@@ -8,7 +8,7 @@ class Manufacturer(models.Model):
     name = models.CharField(max_length=100, unique=True)
     # country = models.CharField(max_length=100, blank=True, null=True)
     # website = models.URLField(blank=True, null=True)
-    history = HistoricalRecords()
+    # history = HistoricalRecords()
     def __str__(self):
         return self.name
 
@@ -43,13 +43,10 @@ class Device (models.Model):
 
     storage_mode = models.CharField(max_length=100, blank=True, null=True)
     started_at = models.DateTimeField(default=timezone.now)
-    history = HistoricalRecords()
-    def save(self, *args, **kwargs):
-        if self.started_at and timezone.is_naive(self.started_at):
-            self.started_at = timezone.make_aware(self.started_at)
-        super().save(*args, **kwargs)
+    # history = HistoricalRecords()
+ 
     def __str__(self):
-        return self.name
+        return self.code
 
 class Reading(models.Model):
 

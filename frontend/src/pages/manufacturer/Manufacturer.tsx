@@ -26,10 +26,15 @@ export default function ManufacturerPage() {
   const [openAdd, setOpenAdd] = useState(false);
   const [openEdit, setOpenEdit] = useState(false);
   const [selectedManufacturer, setSelectedManufacturer] = useState<ManufacturerType | null>(null);
-
+const accessToken =localStorage.getItem('access')
   const fetchManufacturers = async () => {
     try {
-      const res = await fetch('/api/manufacturers/');
+      const res = await fetch('/api/manufacturers/',{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        }},)
       const data = await res.json();
       setManufacturers(data);
     } catch (error) {
@@ -47,6 +52,8 @@ export default function ManufacturerPage() {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+
         },
         body: JSON.stringify({ name }),
       });
@@ -63,6 +70,8 @@ export default function ManufacturerPage() {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+
         },
         body: JSON.stringify({ name }),
       });
@@ -76,7 +85,10 @@ export default function ManufacturerPage() {
   const handleDeleteManufacturer = async (id: number) => {
     try {
       await fetch(`/api/manufacturers/${id}/`, {
+        
         method: 'DELETE',
+        headers: { 'Authorization': `Bearer ${accessToken}`}, 
+
       });
       fetchManufacturers();
     } catch (error) {

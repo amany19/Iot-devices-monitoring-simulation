@@ -13,9 +13,15 @@ export default function Devices() {
   const [devices, setDevices] = useState(mockDevices);
   const [filteredDevices, setFilteredDevices] = useState(devices);
   const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
-
+  const accessToken = localStorage.getItem('access')
+ 
   const fetchDevices = () => {
-    fetch("http://localhost:8000/api/devices")
+    fetch("http://localhost:8000/api/devices",{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        }},)
       .then((res) => res.json())
       .then((data) => {
         setDevices(data);

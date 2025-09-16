@@ -18,12 +18,13 @@ import {
 import type { DeviceType } from "../../types/index ";
 
 export default function PDFReport() {
+  
   const [startTime, setStartTime] = useState<Date | null>(null);
   const [endTime, setEndTime] = useState<Date | null>(null);
   const [devices, setDevices] = useState<DeviceType[] | null>(null);
   const [selectedDeviceIds, setSelectedDeviceIds] = useState<string[]>([]); // Changed from DeviceType[] to string[]
   const [selectionId, setSelectionId] = useState<string>("");
-
+const accessToken = localStorage.getItem('access')
   useEffect(() => {
     const now = new Date();
     const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
@@ -34,7 +35,10 @@ export default function PDFReport() {
 
     const fetchDevices = async () => {
       try {
-        const response = await fetch("/api/devices/");
+        const response = await fetch("/api/devices/",{method:'GET',        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        },});
         if (!response.ok) throw new Error("Failed to fetch devices");
         const data = await response.json();
         setDevices(data);
@@ -56,7 +60,10 @@ export default function PDFReport() {
 
     try {
       if (selectionId === "All Devices") {
-        const response = await fetch(`/api/devices/report/all/?start=${start}&end=${end}`);
+        const response = await fetch(`/api/devices/report/all/?start=${start}&end=${end}`,{method:'GET',        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        },});
         if (!response.ok) throw new Error("Failed to generate all devices PDF");
         const blob = await response.blob();
         downloadBlob(blob, "All_Devices_Report.zip");
@@ -65,6 +72,8 @@ export default function PDFReport() {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
+          'Authorization': `Bearer ${accessToken}`, 
+
           },
           body: JSON.stringify({ device_ids: selectedDeviceIds }),
         });
@@ -72,7 +81,10 @@ export default function PDFReport() {
         const blob = await response.blob();
         downloadBlob(blob, "Custom_Devices_Report.zip");
       } else {
-        const response = await fetch(`/api/devices/${selectionId}/report/?start=${start}&end=${end}`);
+        const response = await fetch(`/api/devices/${selectionId}/report/?start=${start}&end=${end}`,{method:'GET',        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        },});
         if (!response.ok) throw new Error("Failed to generate device PDF");
         const blob = await response.blob();
         downloadBlob(blob, `Device_${selectionId}_Report.pdf`);

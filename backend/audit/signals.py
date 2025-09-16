@@ -5,14 +5,14 @@ from devices.models import Device, Manufacturer
 from .middleware import get_current_user  # ✅ use the one from middleware
 
 @receiver(post_save, sender=Device)
-def log_device_change(sender, instance, created, **kwargs):
-    AuditLog.objects.create(
-        user=get_current_user(),  # now actually returns logged-in user
-        action='CREATE' if created else 'UPDATE',
-        model_name='Device',
-        object_id=str(instance.id),
-        changes=f"Device '{instance.code}' {'created' if created else 'updated'}"
-    )
+# def log_device_change(sender, instance, created, **kwargs):
+#     AuditLog.objects.create(
+#         user=get_current_user(),  # now actually returns logged-in user
+#         action='CREATE' if created else 'UPDATE',
+#         model_name='Device',
+#         object_id=str(instance.id),
+#         changes=f"Device '{instance.code}' {'created' if created else 'updated'}"
+#     )
 
 @receiver(post_delete, sender=Device)
 def log_device_delete(sender, instance, **kwargs):

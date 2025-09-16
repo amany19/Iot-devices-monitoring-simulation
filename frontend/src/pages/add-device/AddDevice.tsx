@@ -60,6 +60,7 @@ function AddDevice() {
 
   const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
   //  console.log(role)
+const accessToken = localStorage.getItem('access');
 
   const handleToggle = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, checked } = e.target;
@@ -130,7 +131,6 @@ function AddDevice() {
       const started_at = startDate
         ? new Date(startDate)
         : new Date();
-const accessToken = localStorage.getItem('access');
       const response = await fetch('http://localhost:8000/api/devices/', {
         method: 'POST',
         headers: {
@@ -169,7 +169,12 @@ const accessToken = localStorage.getItem('access');
   useEffect(() => {
     const fetchManufacturers = async () => {
       try {
-        const res = await fetch('/api/manufacturers/');
+        const res = await fetch('/api/manufacturers/',{
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${accessToken}`, 
+        }},)
         const data = await res.json();
         setManufacturers(data);
       } catch (error) {
@@ -352,7 +357,7 @@ const accessToken = localStorage.getItem('access');
               </MenuItem>
             </TextField>
 
-    {        ['super_admin','admin'].includes(role)&&(
+    {        ['super_admin'].includes(role)&&(
             <>
               <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
               <Stack direction="row" spacing={2}>
@@ -482,7 +487,7 @@ const accessToken = localStorage.getItem('access');
               value={formData.storage_mode ?? 'Loop'}
               onChange={handleChange}
             />
-    {        ['super_admin','admin'].includes(role)&&(
+    {        ['super_admin'].includes(role)&&(
            <><FormLabel htmlFor="started_at" sx={{ mb: 0.5 }}>
               Start Date (optional)
             </FormLabel>

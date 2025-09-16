@@ -13,6 +13,7 @@ from io import BytesIO
 import os
 import zipfile 
 from datetime import datetime,time
+from django.utils import timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
 import matplotlib.pyplot as plt
@@ -34,7 +35,7 @@ matplotlib.use('Agg')  # Use non-GUI backend for rendering
 class DeviceViewSet(viewsets.ModelViewSet):
     queryset = Device.objects.all()
     serializer_class = DeviceSerializer
-
+    permission_classes = [IsAuthenticated] 
     def perform_create(self, serializer):
         device = serializer.save()
         # Backfill readings for the device
@@ -57,7 +58,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
         print(self.request.user)
         AuditLog.objects.create(
 
-            user=self.request.user if self.request.user.is_authenticated else None,
+            user=self.request.user,
             action='UPDATE',
             model_name='Device',
             object_id=str(device.id),
@@ -81,8 +82,13 @@ class DeviceViewSet(viewsets.ModelViewSet):
             readings = readings.filter(timestamp__gte=start)
         if end:
             readings = readings.filter(timestamp__lte=end)
-        return readings
-  
+            # Localize timestamps to the current timezone
+        localized_readings = []
+        for r in readings:
+            r.timestamp = timezone.localtime(r.timestamp)  # convert UTC → local
+            localized_readings.append(r)
+        return localized_readings
+
     def _generate_pdf_device_report(self, device, readings):
         buffer = BytesIO()
 
@@ -93,16 +99,16 @@ class DeviceViewSet(viewsets.ModelViewSet):
 
         temp_max, temp_min, temp_avg = max(temps), min(temps), sum(temps) / len(temps)
         hum_max, hum_min, hum_avg = max(hums), min(hums), sum(hums) / len(hums)
-
+        tz = timezone.get_current_timezone()
         # Generate Temperature Graph
         temp_graph_buf = BytesIO()
         plt.figure(figsize=(10, 3))
         plt.plot(times, temps, label='Temperature', color='red')
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%I:%M %p %d-%m-%Y",tz=tz),)
         plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
         plt.xlabel('Timestamp', weight='bold')
         plt.ylabel('Temperature (°C)', weight='bold')
-        plt.title(f'Device {device.number}  {device.code}- Temperature Over Time', weight='bold')
+        plt.title(f'Device {device.number} {device.code} - Temperature Over Time', weight='bold')
         plt.grid(True)
         plt.xticks(rotation=45)
         plt.tight_layout()
@@ -114,7 +120,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
         hum_graph_buf = BytesIO()
         plt.figure(figsize=(10, 3))
         plt.plot(times, hums, label='Humidity', color='blue')
-        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d %H:%M'))
+        plt.gca().xaxis.set_major_formatter(mdates.DateFormatter("%I:%M %p %d-%m-%Y",tz=tz))
         plt.gca().xaxis.set_major_locator(mdates.AutoDateLocator())
         plt.xlabel('Timestamp', weight='bold')
         plt.ylabel('Humidity (%)', weight='bold')
@@ -131,23 +137,18 @@ class DeviceViewSet(viewsets.ModelViewSet):
         width, height = A4
 
         def draw_header():
-            # Header
             c.setFont("Helvetica-Bold", 28)
             c.drawCentredString(width / 2, height - 50, "Data Report")
 
-            # Device name as link-style
             c.setFont("Helvetica-Bold", 20)
             c.setFillColorRGB(0, 0.7, 1)
             c.drawCentredString(width / 2, height - 80, device.code)
 
-            # Logo
             logo_path = "./assets/goveeIcon.png"
             if os.path.exists(logo_path):
-                c.drawImage(logo_path, 30, height - 60, width=40, preserveAspectRatio=True, mask='auto')
-            else:
-                print(f"Logo not found at: {logo_path}")
+                c.drawImage(logo_path, 30, height - 60, width=40,
+                            preserveAspectRatio=True, mask='auto')
 
-            # Room Name
             c.setFont("Helvetica-Bold", 12)
             c.setFillColor(colors.black)
             c.drawString(50, height - 100, "Location: ")
@@ -155,14 +156,12 @@ class DeviceViewSet(viewsets.ModelViewSet):
             c.drawString(110, height - 100, device.location)
 
         def draw_device_info(y_pos):
-            # Device Information Section
             c.setFont("Helvetica-Bold", 12)
             c.setFillColorRGB(0, 0.75, 0.85)
             c.rect(50, y_pos - 20, width - 100, 20, fill=1, stroke=0)
             c.setFillColor(colors.black)
             c.drawString(55, y_pos - 15, "Device Information")
-            
-            # First row
+
             c.setFont("Helvetica-Bold", 10)
             c.drawString(60, y_pos - 35, "Device Model:")
             c.setFont("Helvetica", 10)
@@ -173,11 +172,11 @@ class DeviceViewSet(viewsets.ModelViewSet):
             c.setFont("Helvetica", 10)
             c.drawString(370, y_pos - 35, "Temperature & Humidity")
 
-            # Second row
             c.setFont("Helvetica-Bold", 10)
             c.drawString(60, y_pos - 50, "Serial Number:")
             c.setFont("Helvetica", 10)
-            c.drawString(140, y_pos - 50, getattr(device, 'serial_number', None) or 'N/A')
+            c.drawString(140, y_pos - 50,
+                        getattr(device, 'serial_number', None) or 'N/A')
 
             c.setFont("Helvetica-Bold", 10)
             c.drawString(250, y_pos - 50, "Firmware Version:")
@@ -187,13 +186,12 @@ class DeviceViewSet(viewsets.ModelViewSet):
             return y_pos - 70
 
         def draw_device_settings(y_pos):
-            # Device Settings
             c.setFont("Helvetica-Bold", 12)
             c.setFillColorRGB(0, 0.75, 0.85)
             c.rect(50, y_pos - 20, width - 100, 20, fill=1, stroke=0)
             c.setFillColor(colors.black)
             c.drawString(55, y_pos - 15, "Device Settings")
-            
+
             c.setFont("Helvetica-Bold", 10)
             c.drawString(60, y_pos - 35, "Button stop: ")
             c.drawString(60, y_pos - 50, "Mute Button:")
@@ -202,7 +200,6 @@ class DeviceViewSet(viewsets.ModelViewSet):
             c.drawString(250, y_pos - 50, "Alarm Logging Interval: ")
             c.drawString(250, y_pos - 65, "Storage Mode: ")
 
-            # Values
             c.setFont("Helvetica", 10)
             c.drawString(140, y_pos - 35, "Disable")
             c.drawString(140, y_pos - 50, "Disable")
@@ -214,25 +211,22 @@ class DeviceViewSet(viewsets.ModelViewSet):
             return y_pos - 85
 
         def draw_alarms(y_pos):
-            # Alarm Status
             c.setFont("Helvetica-Bold", 12)
             c.setFillColorRGB(0, 0.75, 0.85)
             c.rect(50, y_pos - 20, width - 100, 20, fill=1, stroke=0)
             c.setFillColor(colors.black)
             c.drawString(55, y_pos - 15, "Alarm Status")
-            
-            # Fetch recent alarms
+
             alarms = Alarm.objects.filter(device=device).order_by('-timestamp')[:5]
-            
             y = y_pos - 35
             if alarms.exists():
                 for alarm in alarms:
-                    message = f"[{alarm.timestamp.strftime('%Y-%m-%d %H:%M')}] {alarm.alarm_type.upper()} - {alarm.user_message()}"
-                    c.drawString(60, y, message[:100])  # trim long messages
+                    message = f"[{timezone.localtime(alarm.timestamp).strftime('%Y-%m-%d %H:%M')}] {alarm.alarm_type.upper()} - {alarm.user_message()}"
+                    c.drawString(60, y, message[:100])
                     y -= 15
-                    if y < 100:  # Near bottom of page
+                    if y < 100:
                         c.showPage()
-                        y = height - 50  # Reset to top of new page
+                        y = height - 50
             else:
                 c.setFillColorRGB(0.2, 0.2, 0.8)
                 c.drawString(60, y, "There are no available alarms.")
@@ -242,19 +236,16 @@ class DeviceViewSet(viewsets.ModelViewSet):
             return y
 
         def draw_summary(y_pos):
-            # Summary Section
             c.setFont("Helvetica-Bold", 12)
             c.setFillColorRGB(0, 0.75, 0.85)
             c.rect(50, y_pos - 20, width - 100, 20, fill=1, stroke=0)
             c.setFillColor(colors.black)
             c.drawString(55, y_pos - 15, "Summary")
 
-            # Temperature Table
             c.setFillColorRGB(0.2, 0.4, 1)
             c.setFont("Helvetica-Bold", 11)
             c.drawString(110, y_pos - 40, "Temperature")
 
-            # Table content
             y = y_pos - 60
             c.setFillColor(colors.black)
 
@@ -268,12 +259,10 @@ class DeviceViewSet(viewsets.ModelViewSet):
                 c.drawString(160, y, value)
                 y -= 15
 
-            # Humidity Table
             c.setFillColorRGB(0.2, 0.4, 1)
             c.setFont("Helvetica-Bold", 11)
             c.drawString(400, y_pos - 40, "Humidity")
 
-            # Table content
             y = y_pos - 60
             c.setFillColor(colors.black)
 
@@ -290,68 +279,67 @@ class DeviceViewSet(viewsets.ModelViewSet):
             return y_pos - 100
 
         def draw_graphs(y_pos):
-            # Insert Temperature Graph
+            # Temperature Graph
+            if y_pos - 180 < 50:
+                c.showPage()
+                y_pos = height - 50
             temp_img = ImageReader(temp_graph_buf)
             c.drawImage(temp_img, 70, y_pos - 150, width=450, height=150)
+            y_pos -= 180
 
-            # Check if we need a new page for humidity graph
-            if y_pos - 330 < 50:  # Not enough space for next graph
+            # Humidity Graph
+            if y_pos - 180 < 50:
                 c.showPage()
-                y_pos = height - 50  # Reset to top of new page
-
-            # Insert Humidity Graph
+                y_pos = height - 50
             hum_img = ImageReader(hum_graph_buf)
             c.drawImage(hum_img, 70, y_pos - 150, width=450, height=150)
+            y_pos -= 180
+
+            return y_pos
 
         def draw_readings_table(y_pos):
-            # Prepare table data
             table_data = []
             for r in readings:
+                # reading_time =timezone.localtime(r.timestamp)
+                reading_time=r.timestamp
                 table_data.append({
-                    'timestamp': r.timestamp.strftime('%Y-%m-%d %H:%M'),
+                    'timestamp': reading_time.strftime("%I:%M %p %d-%m-%Y"),
                     'temperature': f"{r.temperature:.1f}°C",
                     'humidity': f"{r.humidity:.1f}%"
                 })
 
-            # Readings Table Section
             c.setFont("Helvetica-Bold", 12)
             c.setFillColorRGB(0, 0.75, 0.85)
             c.rect(50, y_pos - 20, width - 100, 20, fill=1, stroke=0)
             c.setFillColor(colors.black)
             c.drawString(55, y_pos - 15, "Readings Data")
-            
-            # Check if we need a new page
-            if y_pos - 250 < 50:  # Not enough space for table
+
+            if y_pos - 250 < 50:
                 c.showPage()
                 y_pos = height - 50
-            
-            # Table setup
-            col_widths = [166, 164, 164]  # Timestamp, Temp, Humidity
+
+            col_widths = [166, 164, 164]
             row_height = 20
             header_height = y_pos - 45
             data_start = header_height - row_height
-            
-            # Draw table headers with borders
+
             headers = ["Timestamp", "Temperature", "Humidity"]
             c.setFont("Helvetica-Bold", 10)
-            
+
             x = 50
             for i, header in enumerate(headers):
                 c.rect(x, header_height - row_height, col_widths[i], row_height)
                 c.drawString(x + 5, header_height - row_height + 5, header)
                 x += col_widths[i]
-            
-            # Draw table rows with data
+
             c.setFont("Helvetica", 9)
             current_y = data_start
-            rows_per_page = 36 # Number of rows that fit on a page
-            
+            rows_per_page = 36
+
             for i, reading in enumerate(table_data):
                 if i > 0 and i % rows_per_page == 0:
-                    # New page needed
                     c.showPage()
                     current_y = height - 50
-                    # Redraw headers on new page
                     c.setFont("Helvetica-Bold", 10)
                     x = 50
                     for j, header in enumerate(headers):
@@ -360,48 +348,46 @@ class DeviceViewSet(viewsets.ModelViewSet):
                         x += col_widths[j]
                     current_y -= row_height
                     c.setFont("Helvetica", 9)
-                
-                # Draw row cells
+
                 x = 50
                 c.rect(x, current_y - row_height, col_widths[0], row_height)
                 c.drawString(x + 5, current_y - row_height + 5, reading['timestamp'])
                 x += col_widths[0]
-                
+
                 c.rect(x, current_y - row_height, col_widths[1], row_height)
                 c.drawString(x + 5, current_y - row_height + 5, reading['temperature'])
                 x += col_widths[1]
-                
+
                 c.rect(x, current_y - row_height, col_widths[2], row_height)
                 c.drawString(x + 5, current_y - row_height + 5, reading['humidity'])
-                
-                current_y -= row_height
-            
-            return current_y - 20  # Add some margin after table
 
-        # Main drawing sequence
+                current_y -= row_height
+
+            return current_y - 20
+
+        # ==== Main Drawing Sequence ====
         draw_header()
-        current_y = height - 125  # Starting position after header
-        
+        current_y = height - 125
+
         current_y = draw_device_info(current_y)
         current_y = draw_device_settings(current_y)
         current_y = draw_alarms(current_y)
-        
-        # After alarms, we might be on a new page, so reset current_y if needed
-        if current_y < 100:  # We're near the bottom of the page
+
+        if current_y < 100:
             c.showPage()
             current_y = height - 50
-        
+
         current_y = draw_summary(current_y)
-        draw_graphs(current_y)
-        
-        # Add the readings table after graphs
-        c.showPage()  # Start table on new page
+        current_y = draw_graphs(current_y)
+
+        c.showPage()
         draw_readings_table(height - 50)
 
         c.save()
         buffer.seek(0)
         return buffer
-    
+
+        
     #report for single device
     @action(detail=True, methods=['get'], url_path='report')   
     def generate_pdf_report(self, request, pk=None):
@@ -413,7 +399,7 @@ class DeviceViewSet(viewsets.ModelViewSet):
             start = parse_datetime(start_param) if start_param else None
             end = parse_datetime(end_param) if end_param else None
             readings=self._get_readings_for_device(device,start,end)
-            if not readings.exists():
+            if not readings:
                 return Response({'error': 'No readings in this time range'}, status=404)
             buffer= self._generate_pdf_device_report(device, readings)
             response = HttpResponse(buffer, content_type='application/pdf')
@@ -567,6 +553,7 @@ class AlarmViewSet(viewsets.ModelViewSet):
 class ManufacturerViewSet(viewsets.ModelViewSet):
     queryset = Manufacturer.objects.all()
     serializer_class = ManufacturerSerializer
+    permission_classes = [IsAuthenticated] 
     def perform_create(self, serializer):
         manufacturer = serializer.save()
         # ✅ Log creation

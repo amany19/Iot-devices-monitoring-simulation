@@ -13,6 +13,7 @@ class AuditLogSerializer(serializers.ModelSerializer):
         fields = ['id', 'user_id', 'username', 'action', 'model_name', 'object_id', 'changes', 'timestamp']
 
     def get_user_id(self, obj):
+        print()
         return obj.user.id if obj.user else None
 
     def get_username(self, obj):
