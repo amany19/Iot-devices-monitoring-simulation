@@ -9,7 +9,12 @@ def generate_random_reading(device_id):
 
     temp = round(random.uniform(device.temperature_min, device.temperature_max), 2)
     humidity = round(random.uniform(device.humidity_min, device.humidity_max), 2)
-    timestamp = timezone.now()
+    # timestamp=timezone.now
+    last_reading = Reading.objects.filter(device=device).order_by('-timestamp').first()
+    
+    interval = timedelta(minutes=device.logging_interval_minutes or 15)
+    
+    timestamp = last_reading.timestamp+interval
 
     Reading.objects.create(
         device=device,
