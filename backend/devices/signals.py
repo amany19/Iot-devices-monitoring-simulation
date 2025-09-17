@@ -9,30 +9,38 @@ def handle_new_reading(sender, instance, **kwargs):
 
     # Only generate reading-based alarms when device is ON
     if device.status == 'on':
-        check_and_create_reading_alarms(device, instance.temperature, instance.humidity,instance.timestamp)
+        check_and_create_reading_alarms(
+            device, instance.temperature, instance.humidity, instance.timestamp
+        )
 
 
-def check_and_create_reading_alarms(device, temperature, humidity,reading_timestamp):
-    def create_alarm_once(alarm_type, value=None):
-        if not Alarm.objects.filter(
-            device=device, alarm_type=alarm_type, acknowledged=False, active=True
-        ).exists():
-            Alarm.objects.create(
-                device=device,
-                alarm_type=alarm_type,
-                triggered_value=value,
-                timestamp=reading_timestamp 
-            )
+def check_and_create_reading_alarms(device, temperature, humidity, reading_timestamp):
+    def create_or_update_alarm(alarm_type, value=None):
+        alarm, created = Alarm.objects.get_or_create(
+            device=device,
+            alarm_type=alarm_type,
+            acknowledged=False,
+            active=True,
+            defaults={
+                "triggered_value": value,
+                "timestamp": reading_timestamp,
+            },
+        )
+        if not created:
+            # Update the alarm if it already exists (e.g. overwritten reading)
+            alarm.triggered_value = value
+            alarm.timestamp = reading_timestamp
+            alarm.save(update_fields=["triggered_value", "timestamp"])
 
     if device.alert_temp_max is not None and temperature > device.alert_temp_max:
-        create_alarm_once('TEMP_HI', temperature)
+        create_or_update_alarm("TEMP_HI", temperature)
     elif device.alert_temp_min is not None and temperature < device.alert_temp_min:
-        create_alarm_once('TEMP_LO', temperature)
+        create_or_update_alarm("TEMP_LO", temperature)
 
     if device.alert_humidity_max is not None and humidity > device.alert_humidity_max:
-        create_alarm_once('HUM_HI', humidity)
+        create_or_update_alarm("HUM_HI", humidity)
     elif device.alert_humidity_min is not None and humidity < device.alert_humidity_min:
-        create_alarm_once('HUM_LO', humidity)
+        create_or_update_alarm("HUM_LO", humidity)
 
 
 # === Status-triggered alarms ===
@@ -47,14 +55,14 @@ def handle_device_status_change(sender, instance, created, **kwargs):
         ).exists():
             Alarm.objects.create(
                 device=instance,
-                alarm_type=alarm_type
+                alarm_type=alarm_type,
             )
 
-    if instance.status == 'off':
-        create_status_alarm('DC')
+    if instance.status == "off":
+        create_status_alarm("DC")
 
     if not instance.button_stop_enabled:
-        create_status_alarm('SD')
+        create_status_alarm("SD")
 
     if not instance.mute_button_enabled:
-        create_status_alarm('MD')
+        create_status_alarm("MD")

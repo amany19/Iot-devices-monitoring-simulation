@@ -499,8 +499,8 @@ class ReadingViewSet(viewsets.ModelViewSet):
 
         updated_count = 0
         for reading in readings:
-            reading.temperature = temp_min if temp_min == temp_max else round(random.uniform(temp_min, temp_max), 2)
-            reading.humidity = hum_min if hum_min == hum_max else round(random.uniform(hum_min, hum_max), 2)
+            reading.temperature = round(random.uniform(temp_min, temp_max), 2)
+            reading.humidity = round(random.uniform(hum_min, hum_max), 2)
             reading.save()
             updated_count += 1
 

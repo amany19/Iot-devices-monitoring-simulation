@@ -5,14 +5,11 @@ import {
 import { DateTimePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 import dayjs from 'dayjs';
+import type { DeviceType } from '../../types/index ';
 
-type Device = {
-  id: number;
-  name: string;
-};
 
 export default function InjectReading() {
-  const [devices, setDevices] = useState<Device[]>([]);
+  const [devices, setDevices] = useState<DeviceType[]>([]);
   const [deviceMode, setDeviceMode] = useState<'single' | 'all' | 'multiple'>('single');
 
   // Separate states for single vs multiple
@@ -146,7 +143,7 @@ export default function InjectReading() {
           >
             {devices.map(dev => (
               <MenuItem key={dev.id} value={dev.id}>
-                {dev.name}
+                {dev.number}
               </MenuItem>
             ))}
           </TextField>
@@ -157,13 +154,13 @@ export default function InjectReading() {
           <DateTimePicker
             label="Start Time"
             value={start}
-            onChange={(val) => setStart(val!)}
+            onChange={(val:any) => setStart(val!)}
             slotProps={{ textField: { fullWidth: true } }}
           />
           <DateTimePicker
             label="End Time"
             value={end}
-            onChange={(val) => setEnd(val!)}
+            onChange={(val:any) => setEnd(val!)}
             slotProps={{ textField: { fullWidth: true } }}
           />
         </LocalizationProvider>
