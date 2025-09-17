@@ -21,11 +21,11 @@ import type Device from '../../types/device';
 import type { ManufacturerType } from '../../types/index ';
 
 interface DeviceFormData extends Omit<Device, 'id' | 'readings'> {
-  started_at?: Date;
+  started_at?: Date | null;
 }
 
 const initialDevice: DeviceFormData = {
-  number: NaN,
+  number: 0,
   code: '',
   location: '',
   status: 'off',
@@ -46,27 +46,47 @@ const initialDevice: DeviceFormData = {
   mute_button_enabled: false,
   alarm_tone_enabled: false,
   storage_mode: 'Loop',
-  started_at: undefined,
+  started_at: null,
 };
 
 function EditDevice() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [formData, setFormData] = useState<DeviceFormData>(initialDevice);
-  const [startDate, setStartDate] = useState<Date | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof DeviceFormData, string>>>({});
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [manufacturers, setManufacturers] = useState<ManufacturerType[]>([]);
   const role = (localStorage.getItem('role') ?? 'guest').toLocaleLowerCase();
+  const accessToken = localStorage.getItem('access');
 
   useEffect(() => {
     const fetchDevice = async () => {
       try {
-        const res = await fetch(`/api/devices/${id}/`);
+        const res = await fetch(`/api/devices/${id}/`, {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${accessToken}`,
+          }
+        },);
         const data = await res.json();
-        setFormData(data);
-        if (data.started_at) setStartDate(new Date(data.started_at));
+        setFormData({
+          ...data,
+          number: data.number != null ? String(data.number) : '',
+          humidity_min: data.humidity_min != null ? String(data.humidity_min) : '',
+          humidity_max: data.humidity_max != null ? String(data.humidity_max) : '',
+          temperature_min: data.temperature_min != null ? String(data.temperature_min) : '',
+          temperature_max: data.temperature_max != null ? String(data.temperature_max) : '',
+          logging_interval_minutes: data.logging_interval_minutes != null ? String(data.logging_interval_minutes) : '',
+          alert_temp_min: data.alert_temp_min != null ? String(data.alert_temp_min) : '',
+          alert_temp_max: data.alert_temp_max != null ? String(data.alert_temp_max) : '',
+          alert_humidity_min: data.alert_humidity_min != null ? String(data.alert_humidity_min) : '',
+          alert_humidity_max: data.alert_humidity_max != null ? String(data.alert_humidity_max) : '',
+          manufacturer: data.manufacturer?.id ?? '',
+          started_at: data.started_at ? new Date(data.started_at) : null,
+        });
+
       } catch (error) {
         console.error('Error loading device:', error);
       }
@@ -74,11 +94,11 @@ function EditDevice() {
 
     const fetchManufacturers = async () => {
       try {
-        const res = await fetch('/api/manufacturers/',{method:'GET',
-          headers:{
-          'Authorization': `Bearer ${localStorage.getItem('access')}`
-
-          }
+        const res = await fetch('/api/manufacturers/', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${localStorage.getItem('access')}`,
+          },
         });
         const data = await res.json();
         setManufacturers(data);
@@ -111,7 +131,7 @@ function EditDevice() {
   };
 
   const handleDateChange = (date: any) => {
-    setStartDate(date);
+    setFormData((prev) => ({ ...prev, started_at: date }));
   };
 
   const validate = () => {
@@ -168,19 +188,29 @@ function EditDevice() {
     setSubmitSuccess(false);
 
     if (!validate()) return;
-  const username=localStorage.getItem('username')
+    const username = localStorage.getItem('username');
     try {
       const updatedDevice = {
         ...formData,
-        started_at: startDate?.toISOString() ?? null,
+        number: formData.number ? Number(formData.number) : null,
+        humidity_min: formData.humidity_min ? Number(formData.humidity_min) : null,
+        humidity_max: formData.humidity_max ? Number(formData.humidity_max) : null,
+        temperature_min: formData.temperature_min ? Number(formData.temperature_min) : null,
+        temperature_max: formData.temperature_max ? Number(formData.temperature_max) : null,
+        logging_interval_minutes: formData.logging_interval_minutes ? Number(formData.logging_interval_minutes) : null,
+        alert_temp_min: formData.alert_temp_min ? Number(formData.alert_temp_min) : null,
+        alert_temp_max: formData.alert_temp_max ? Number(formData.alert_temp_max) : null,
+        alert_humidity_min: formData.alert_humidity_min ? Number(formData.alert_humidity_min) : null,
+        alert_humidity_max: formData.alert_humidity_max ? Number(formData.alert_humidity_max) : null,
+        started_at: formData.started_at ? formData.started_at.toISOString() : null,
         user: username,
       };
-const accessToken = localStorage.getItem('access');
+
       const res = await fetch(`/api/devices/${id}/`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
-          'Authorization': `Bearer ${accessToken}`, 
+          'Authorization': `Bearer ${accessToken}`,
         },
         body: JSON.stringify(updatedDevice),
       });
@@ -356,8 +386,10 @@ const accessToken = localStorage.getItem('access');
                     onChange={handleChange}
                     variant="filled"
                     fullWidth
-                  /></Stack> </>)}
-
+                  />
+                </Stack>
+              </>
+            )}
 
             <FormLabel sx={{ mt: 2 }}>Alert Temperature Range (°C)</FormLabel>
             <Stack direction="row" spacing={2}>
@@ -402,20 +434,24 @@ const accessToken = localStorage.getItem('access');
                 fullWidth
               />
             </Stack>
-            {['super_admin', 'admin'].includes(role) && (<>
-              <FormLabel htmlFor="started_at">Start Date</FormLabel>
-              <DateTimePicker
-                disableFuture
-                value={startDate}
-                onChange={handleDateChange}
-                slotProps={{
-                  textField: {
-                    variant: 'filled',
-                    fullWidth: true,
-                  },
-                }}
-              />
-            </>)}
+
+            {['super_admin', 'admin'].includes(role) && (
+              <>
+                <FormLabel htmlFor="started_at">Start Date</FormLabel>
+                <DateTimePicker
+                  disableFuture
+                  value={formData.started_at}
+                  onChange={handleDateChange}
+                  slotProps={{
+                    textField: {
+                      variant: 'filled',
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </>
+            )}
+
             <FormControlLabel
               control={
                 <Switch

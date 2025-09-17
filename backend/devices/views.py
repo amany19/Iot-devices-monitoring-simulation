@@ -199,11 +199,13 @@ class DeviceViewSet(viewsets.ModelViewSet):
             c.drawString(250, y_pos - 35, "Logging Interval: ")
             c.drawString(250, y_pos - 50, "Alarm Logging Interval: ")
             c.drawString(250, y_pos - 65, "Storage Mode: ")
-
+            button_stop="Enable" if device.button_stop_enabled else"Disable"
+            mute_stop="Enable" if device.mute_button_enabled else"Disable"
+            alarm_tone="Enable" if device.alarm_tone_enabled else"Disable"
             c.setFont("Helvetica", 10)
-            c.drawString(140, y_pos - 35, "Disable")
-            c.drawString(140, y_pos - 50, "Disable")
-            c.drawString(140, y_pos - 65, "Enable")
+            c.drawString(140, y_pos - 35, button_stop)
+            c.drawString(140, y_pos - 50, mute_stop)
+            c.drawString(140, y_pos - 65, alarm_tone)
             c.drawString(370, y_pos - 35, "15m")
             c.drawString(370, y_pos - 50, "15m")
             c.drawString(370, y_pos - 65, "Loop")
