@@ -12,7 +12,7 @@ from reportlab.pdfgen import canvas
 from io import BytesIO
 import os
 import zipfile 
-from datetime import datetime,time
+from datetime import datetime,time, timedelta
 from django.utils import timezone
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.utils import ImageReader
@@ -485,6 +485,10 @@ class ReadingViewSet(viewsets.ModelViewSet):
         device_ids = request.data.get('device_ids', [])
         start_time = parse_datetime(request.data.get('start_time'))
         end_time = parse_datetime(request.data.get('end_time'))
+        # Round and tolerance slight values to handle the microseconds stored in the database for each reading
+        start_time = (start_time - timedelta(seconds=30)).replace(microsecond=0)
+        end_time = (end_time + timedelta(seconds=30)).replace(microsecond=999999)
+        print(start_time) 
         temp_min = float(request.data.get('temp_min'))
         temp_max = float(request.data.get('temp_max'))
         hum_min = float(request.data.get('hum_min'))
