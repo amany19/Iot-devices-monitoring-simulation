@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import  { useEffect, useState } from "react";
 import DeviceGraph from "../show-monitoring-graph/DeviceGraph";
 import { useParams } from "react-router-dom";
 import DeviceDetailsTable from "../../components/DeviceDetailsTable";
@@ -88,7 +88,7 @@ const accessToken = localStorage.getItem('access')
             disableFuture
             label="Start Date"
             value={startTime}
-            onChange={(newValue: Date | null) => {
+            onChange={(newValue:any) => {
               if (newValue) {
                 const normalized = new Date(newValue);
                 normalized.setHours(0, 0, 0, 0);
@@ -101,7 +101,7 @@ const accessToken = localStorage.getItem('access')
             disableFuture
             label="End Date"
             value={endTime}
-            onChange={(newValue: Date | null) => {
+            onChange={(newValue: any) => {
               if (newValue) {
                 const normalized = new Date(newValue);
                 normalized.setHours(23, 59, 59, 999);

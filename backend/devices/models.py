@@ -68,7 +68,7 @@ class Alarm(models.Model):
     device = models.ForeignKey(Device, on_delete=models.CASCADE, related_name='alarms')
     alarm_type = models.CharField(max_length=10, choices=ALARM_TYPES)
     triggered_value = models.FloatField(null=True, blank=True)  # not needed for DC
-    timestamp = models.DateTimeField(auto_now_add=True)
+    timestamp = models.DateTimeField(default=timezone.now)
     acknowledged = models.BooleanField(default=False)
     active = models.BooleanField(default=True)
 

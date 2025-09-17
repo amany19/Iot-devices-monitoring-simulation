@@ -74,7 +74,12 @@ function EditDevice() {
 
     const fetchManufacturers = async () => {
       try {
-        const res = await fetch('/api/manufacturers/');
+        const res = await fetch('/api/manufacturers/',{method:'GET',
+          headers:{
+          'Authorization': `Bearer ${localStorage.getItem('access')}`
+
+          }
+        });
         const data = await res.json();
         setManufacturers(data);
       } catch (error) {
@@ -105,7 +110,7 @@ function EditDevice() {
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
-  const handleDateChange = (date: Date | null) => {
+  const handleDateChange = (date: any) => {
     setStartDate(date);
   };
 

@@ -43,9 +43,9 @@ export default function Navbar({ onToggleDrawer }: NavbarProps) {
     setAnchorEl(null);
   };
 
-  const onDeleteSuccess = () => {
-    fetchAlarms();
-  };
+  // const onDeleteSuccess = () => {
+  //   fetchAlarms();
+  // };
 
   return (
     <AppBar className="nav-conatiner" position="fixed" sx={{ zIndex: (theme) => theme.zIndex.drawer + 1 }}>

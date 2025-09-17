@@ -1,4 +1,3 @@
-import React from 'react';
 import {
   Table,
   TableBody,
@@ -10,8 +9,8 @@ import {
 } from '@mui/material';
 import type { DeviceType } from '../types/index ';
 
- 
-export default function DeviceDetailsTable( {device} : {device:DeviceType}) {
+
+export default function DeviceDetailsTable({ device }: { device: DeviceType }) {
   return (
     <TableContainer component={Paper} sx={{ maxWidth: 500, mx: 'auto', mt: 4 }}>
       <Typography variant="h6" sx={{ p: 2, backgroundColor: '#14B8A6', fontWeight: 'bold' }}>
@@ -19,13 +18,13 @@ export default function DeviceDetailsTable( {device} : {device:DeviceType}) {
       </Typography>
       <Table>
         <TableBody>
-          <TableRow >
+          {/* <TableRow >
             <TableCell><strong>ID</strong></TableCell>
             <TableCell>{device.id}</TableCell>
-          </TableRow>
+          </TableRow> */}
           <TableRow>
-            <TableCell><strong>Name</strong></TableCell>
-            <TableCell>{device.name}</TableCell>
+            <TableCell><strong>Device Number</strong></TableCell>
+            <TableCell>{device.number}</TableCell>
           </TableRow>
           <TableRow>
             <TableCell><strong>Code</strong></TableCell>
@@ -49,19 +48,24 @@ export default function DeviceDetailsTable( {device} : {device:DeviceType}) {
               <TableCell>{device.location}</TableCell>
             </TableRow>
           )}
-          {!!(device.temperature_max&&device.temperature_min) && (
+          <TableRow>
+            <TableCell><strong>Model</strong></TableCell>
+            <TableCell>{device.model}</TableCell>
+          </TableRow>
+ 
+          {!!(device.alert_temp_min && device.alert_temp_max) && (
             <TableRow>
-              <TableCell><strong>Normal Temp</strong></TableCell>
+              <TableCell><strong>Alert Temperature</strong></TableCell>
               <TableCell>
-                {device.temperature_min}° - {device.temperature_max}°
+                {device.alert_temp_min}° - {device.alert_temp_max}°
               </TableCell>
             </TableRow>
           )}
-          {!!(device.humidity_max&&device.humidity_min) && (
+          {!!(device.alert_humidity_min && device.alert_humidity_max) && (
             <TableRow>
-              <TableCell><strong>Normal Humidity</strong></TableCell>
+              <TableCell><strong>Alert Humidity</strong></TableCell>
               <TableCell>
-                {device.humidity_min}% - {device.humidity_max}%
+                {device.alert_humidity_min}% - {device.alert_humidity_min}%
               </TableCell>
             </TableRow>
           )}

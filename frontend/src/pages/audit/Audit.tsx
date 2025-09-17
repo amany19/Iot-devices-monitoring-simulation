@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Table, TableBody, TableCell, TableHead, TableRow, Paper, Typography } from "@mui/material";
+import type AuditType from "../../types/audit";
 
 export default function Audit() {
   const [logs, setLogs] = useState([]);
@@ -10,7 +11,7 @@ export default function Audit() {
     })
       .then(res => res.json())
       .then(data => {setLogs(data);
-        console.log(data)
+        // console.log(data)
       });
   }, []);
 
@@ -29,7 +30,7 @@ export default function Audit() {
           </TableRow>
         </TableHead>
         <TableBody>
-          {logs.map((log, index) => (
+          {logs.map((log:AuditType, index) => (
             <TableRow key={index}>
               <TableCell>{new Date(log.timestamp).toLocaleString()}</TableCell>
               <TableCell>{log.username}</TableCell>

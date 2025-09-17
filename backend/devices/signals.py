@@ -9,10 +9,10 @@ def handle_new_reading(sender, instance, **kwargs):
 
     # Only generate reading-based alarms when device is ON
     if device.status == 'on':
-        check_and_create_reading_alarms(device, instance.temperature, instance.humidity)
+        check_and_create_reading_alarms(device, instance.temperature, instance.humidity,instance.timestamp)
 
 
-def check_and_create_reading_alarms(device, temperature, humidity):
+def check_and_create_reading_alarms(device, temperature, humidity,reading_timestamp):
     def create_alarm_once(alarm_type, value=None):
         if not Alarm.objects.filter(
             device=device, alarm_type=alarm_type, acknowledged=False, active=True
@@ -20,7 +20,8 @@ def check_and_create_reading_alarms(device, temperature, humidity):
             Alarm.objects.create(
                 device=device,
                 alarm_type=alarm_type,
-                triggered_value=value
+                triggered_value=value,
+                timestamp=reading_timestamp 
             )
 
     if device.alert_temp_max is not None and temperature > device.alert_temp_max:

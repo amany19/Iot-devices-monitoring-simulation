@@ -67,7 +67,7 @@ const accessToken = localStorage.getItem('access');
     setFormData((prev) => ({ ...prev, [name]: checked }));
   };
 
-  const handleDateChange = (date: Date | null) => {
+  const handleDateChange = (date:any) => {
     setStartDate(date);
   };
 
@@ -359,7 +359,7 @@ const accessToken = localStorage.getItem('access');
 
     {        ['super_admin'].includes(role)&&(
             <>
-              <FormLabel sx={{ mt: 2 }}>Normal Temperature Range (°C)</FormLabel>
+              <FormLabel sx={{ mt: 2 }}>Simulation Temperature Range (°C)</FormLabel>
               <Stack direction="row" spacing={2}>
                 <TextField
                   name="temperature_min"
@@ -383,7 +383,7 @@ const accessToken = localStorage.getItem('access');
                 />
               </Stack>
 
-              <FormLabel sx={{ mt: 2 }}>Normal Humidity Range (%)</FormLabel>
+              <FormLabel sx={{ mt: 2 }}>Simulation Humidity Range (%)</FormLabel>
               <Stack direction="row" spacing={2}>
                 <TextField
                   name="humidity_min"
