@@ -1,6 +1,6 @@
 # Govee Monitoring App
 
-A full-stack web application for simulating and monitoring Govee devices.
+A full-stack web application for simulating and monitoring Iot devices.
 
 ## Tech Stack
 
